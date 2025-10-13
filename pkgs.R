@@ -5,6 +5,7 @@ pkgs = c(
   "dplyr",
   "writexl",
   "mice",
+  "stringr",
   "readr"
 )
 

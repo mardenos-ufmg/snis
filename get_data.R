@@ -1,4 +1,8 @@
 
+####################
+####  ler base  ####
+####################
+
 read = function(file) {
   file |>
     file(encoding = "UTF-16LE") |>
@@ -32,12 +36,14 @@ read = function(file) {
       mutate(., across(all_of(col_sem_letras),
                        ~ readr::parse_number(., locale = readr::locale(decimal_mark = ",", grouping_mark = "."))
                        ))
-    }}()
+    }}() |>
+    mutate(across(where(is.character), stringr::str_trim))
 }
 
 df = read("data/Agregado-2018.csv")
 df = read("data/Agregado-completo.csv")
 df = read("data/Desagregado-2018.csv")
+df = read("data/Desagregado-2022-2021.csv")
 
 readr::guess_encoding("data/Agregado-20251012180348.csv")
 
@@ -57,6 +63,60 @@ sum(!(vars %in% colnames(df)))  # há 7 vars que não estão no agregado, todas 
 # Falta "Nome_Mesorregi?o"
 vars[!(vars %in% colnames(df))]
 
+read.csv(file("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", encoding = "ASCII"))
+
+
+# Tipo de Serviço AGREGADO
+# Tipo de serviço DESAGREGADO
+
+#################################
+####  tratar para aplicação  ####
+#################################
+
+filter_data = function(file) {
+  df = read(file)
+  
+  ibge =
+    readxl::read_xls("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.xls", skip = 6) |>
+    #readxl::read_xls("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.xls", skip = 6, range = "A7:I9999") |>
+    dplyr::select(c("Código Município Completo",
+                    "Região Geográfica Intermediária",
+                    "Nome Região Geográfica Intermediária",
+                    "Região Geográfica Imediata",
+                    "Nome Região Geográfica Imediata")) |>
+    `colnames<-`(c("Código do Município",
+                   "Código da Região Intermediária",
+                   "Região Intermediária",
+                   "Código da Região Imediata",
+                   "Região Imediata")) |>
+    dplyr::mutate(
+      "Código do Município" = substr(.data$"Código do Município", 1, 6)
+    )
+  
+  df =
+    dplyr::left_join(df, ibge, by = "Código do Município") |>
+    dplyr::select(
+      c(
+        "Natureza jurídica","Tipo de serviço","Abrangência","Município",
+        "Região Intermediária", "Código do Prestador","Prestador","POP_URB","POP_TOT",
+        "IN002","IN031","IN101","IN049","IN019","IN023","IN024",
+        "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
+        "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
+        "AG013","AG022","IN006","IN016","IN047","ES006","ES005"
+      )
+    ) |>
+    dplyr::filter(.data$"Tipo de serviço" != "Esgotos")
+  
+}
+
+# precisa "Região Imediata"
+# Começar com nome de ... ?
+# Em 2017, o IBGE reformulou a divisão regional do país, substituindo as mesorregiões pelas novas regiões geográficas intermediárias, e as microrregiões pelas regiões geográficas imediatas. 
+# site do SNIS ainda fala 
+
+#any(duplicated(substr(ibge$"Código do Município", 1, 6)))
+
+
 dado <- read_excel("C:\\Users\\DELL\\Google Drive\\2021-2\\TCC\\Dataset\\SNIS_2019_final.xlsx")
 
 dado_filter <- dado[,vars]
@@ -67,12 +127,12 @@ dado_filter$`Tipo de servi?o`
 
 
 ## Preencher com zero as variaveis de esgoto para prestadores de ?gua
-var_esgoto <- c("IN006","IN016","IN047","IN015","Tipo de servi?o")
+var_esgoto <- c("IN006","IN016","IN047","IN015","Tipo de serviço")
 d_esgoto <- dado_filter[,var_esgoto]
 
 for (i in 1:nrow(d_esgoto)){
-  if (d_esgoto$`Tipo de servi?o`[i]=="?gua"){
-    d_esgoto[i,][is.na(d_esgoto[i,])] <- "0"
+  if (d_esgoto$`Tipo de serviço`[i]=="Água"){
+    d_esgoto[i,][is.na(d_esgoto[i,])] <- 0
   }
 }
 
