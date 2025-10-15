@@ -1,3 +1,5 @@
+install.packages("pak")
+
 pkgs = c(
   "readxl",
   "mice",

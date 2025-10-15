@@ -94,21 +94,86 @@ filter_data = function(file) {
     )
   
   df =
-    dplyr::left_join(df, ibge, by = "Código do Município") |>
+    df |>
+    dplyr::left_join(ibge, by = "Código do Município") |>
     dplyr::select(
-      c(
+      all_of(c(
         "Natureza jurídica","Tipo de serviço","Abrangência","Município",
         "Região Intermediária", "Código do Prestador","Prestador","POP_URB","POP_TOT",
         "IN002","IN031","IN101","IN049","IN019","IN023","IN024",
         "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
         "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
         "AG013","AG022","IN006","IN016","IN047","ES006","ES005"
-      )
+      ))
     ) |>
-    dplyr::filter(.data$"Tipo de serviço" != "Esgotos")
+    dplyr::filter(.data$"Tipo de serviço" != "Esgotos") |>
+    mutate(
+      across(c("IN006","IN016","IN047","IN015"),
+             ~ case_when(
+               is.na(.) & .data$`Tipo de serviço` == "Água" ~ 0, 
+               TRUE ~ .
+             )
+      )
+    )
   
+  #IN024 tem multicolinearidade com IN047 
+  #AG022 tem multicolineadidade com AG013
+  #### Excluindo IN047 e AG013 para imputar IN024 e AG022
+  numerico = c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
+                "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
+                "IN015","IN009","IN013","IN029","IN058","IN004","IN003","POP_URB",
+                "POP_TOT","AG013","IN006","IN016","IN047","AG022")
+  numerico2 = c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
+                 "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
+                 "IN015","IN009","IN013","IN029","IN058","IN004","IN003","POP_URB",
+                 "POP_TOT","IN006","IN016","AG022")
+  dados_f = df
+  dados_input <- dados_f[,numerico]
+  dados_input[numerico] <- sapply(dados_input[numerico],as.numeric)
+  dados_input.imp <- mice(dados_input,m=5,method = "cart", printFlag = FALSE)
+  a <- complete(dados_input.imp)
+  dados_input2 <- a[,numerico2]
+  dados_input2.imp <- mice(dados_input2,m=5,method = "cart", printFlag = FALSE)
+  a2 <- complete(dados_input2.imp)
+  
+  input =
+    # df |>
+    # select(all_of(numerico)) |>
+    # mice::mice(m = 5, method = "cart", printFlag = FALSE) |>
+    # mice::complete() |>
+    a |>
+    mutate(
+      IN024 = a2$IN024,
+      AG022 = a2$AG022,
+      AG022 = case_when(
+        .data$AG022 > .data$AG013 ~ .data$AG013,
+        TRUE ~ .data$AG022
+      ),
+      Tarifa = .data$IN004 / .data$IN003,
+      Micromedida = .data$AG013 - .data$AG022,
+      Urbanização   = .data$POP_URB / .data$POP_TOT
+    )
+  
+  # qtde_n_micromedida  VIROU Micromedida
+  # grau_urbanizacao    VIROU Urbanização
+  
+  df =
+    df[,!(names(dados_f) %in% numerico)] |>
+    cbind(input) |>
+    mutate(
+      Prestador2 =
+        case_when(
+          .data$`Natureza jurídica` == "Empresa pública" ~ "COPANOR",
+          .data$`Natureza jurídica` == "Sociedade de economia mista com administração pública" ~ "COPASA",
+          .data$`Natureza jurídica` == "Autarquia" ~ "Autarquia",
+          .data$`Natureza jurídica` == "Administração pública direta" ~ "Prefeitura",
+          .data$`Natureza jurídica` == "Empresa privada" ~ "Empresa privada"
+        )
+    )
+    
+  df
 }
-
+ 
 # precisa "Região Imediata"
 # Começar com nome de ... ?
 # Em 2017, o IBGE reformulou a divisão regional do país, substituindo as mesorregiões pelas novas regiões geográficas intermediárias, e as microrregiões pelas regiões geográficas imediatas. 
@@ -117,94 +182,21 @@ filter_data = function(file) {
 #any(duplicated(substr(ibge$"Código do Município", 1, 6)))
 
 
-dado <- read_excel("C:\\Users\\DELL\\Google Drive\\2021-2\\TCC\\Dataset\\SNIS_2019_final.xlsx")
+dado <- read("data/Desagregado-2019.csv")
+dado <- filter_data("data/Desagregado-2019.csv")
 
-dado_filter <- dado[,vars]
-
-#Retirando variaveis de esgoto
-dado_filter <- filter(dado_filter, dado_filter$`Tipo de servi?o`!= "Esgotos")
-dado_filter$`Tipo de servi?o`
+dado <- read_excel("data/SNIS_2019_final.xlsx")
+dado <- read_excel("data/SNIS_COMPLETO_2021.xlsx")
 
 
-## Preencher com zero as variaveis de esgoto para prestadores de ?gua
-var_esgoto <- c("IN006","IN016","IN047","IN015","Tipo de serviço")
-d_esgoto <- dado_filter[,var_esgoto]
-
-for (i in 1:nrow(d_esgoto)){
-  if (d_esgoto$`Tipo de serviço`[i]=="Água"){
-    d_esgoto[i,][is.na(d_esgoto[i,])] <- 0
-  }
-}
-
-#Adicionando dados tratados
-dado_filter_esgoto <- dado_filter[,!(names(dado_filter) %in% var_esgoto)] #retirando da original
-dados_f <- cbind(dado_filter_esgoto,d_esgoto) #adicionando
 
 
-##### mice ####
-numerico <- c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
-              "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
-              "IN015","IN009","IN013","IN029","IN058","IN004","IN003","POP_URB",
-              "POP_TOT","AG013","IN006","IN016","IN047","AG022")
-#
-dados_input <- dados_f[,numerico]
 
-dados_input[numerico] <- sapply(dados_input[numerico],as.numeric)
-summary(dados_input)
+#################################
+####  Resolvendo duplicados  ####
+#################################
 
 
-#impute missing values, using all parameters as default values
-dados_input.imp <- mice(dados_input,m=5,method = "cart")
-summary(dados_input.imp)
-a <- complete(dados_input.imp)
-
-#### checando colinearidade
-mice:::find.collinear(dados_input)
-cor(dados_input, use = "pairwise.complete.obs")
-
-#IN024 tem multicolinearidade com IN047 
-#AG022 tem multicolineadidade com AG013
-
-#### Excluindo IN047 e AG013 para imputar IN024 e AG022
-numerico2 <- c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
-               "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
-               "IN015","IN009","IN013","IN029","IN058","IN004","IN003","POP_URB",
-               "POP_TOT","IN006","IN016","AG022")
-
-dados_input2 <- a[,numerico2]
-
-dados_input2.imp <- mice(dados_input2,m=5,method = "cart")
-summary(dados_input2.imp)
-a2 <- complete(dados_input2.imp)
-
-## juntando
-a$IN024 <- a2$IN024
-a$AG022 <- a2$AG022
-
-for (i in 1: length(a$AG022)){
-  if (a$AG022[i]>a$AG013[i]){
-    a$AG022[i] <- a$AG013[i]
-  } 
-} 
-
-###Criando colunas
-
-#"prestador2","grau_urbanizacao","qtde_n_micromedida","Razao"
-a$Tarifa <- a$IN004 / a$IN003
-a$qtde_n_micromedida <- a$AG013 - a$AG022
-a$grau_urbanizacao <- a$POP_URB / a$POP_TOT
-
-#Adicionando dados tratados
-dados_missing <- dados_f[,!(names(dados_f) %in% numerico)] #retirando da original
-dataset_final <- cbind(a,dados_missing) #adicionando
-
-dataset_final <- dataset_final %>% mutate(Prestador2 =
-                                            case_when(dataset_final$`Natureza jur?dica` == "Empresa p?blica" ~ "COPANOR",
-                                                      dataset_final$`Natureza jur?dica` == "Sociedade de economia mista com administra??o p?blica" ~ "COPASA",
-                                                      dataset_final$`Natureza jur?dica` == "Autarquia" ~ "Autarquia",
-                                                      dataset_final$`Natureza jur?dica` == "Administra??o p?blica direta" ~ "Prefeitura",
-                                                      dataset_final$`Natureza jur?dica` == "Empresa privada" ~ "Empresa privada")
-)
 
 ###### Resolvendo duplicados ####
 municipios_duplicados <- read_excel("C:\\Users\\DELL\\Google Drive\\2021-2\\TCC\\Codigos\\municipios_duplicados_natureza_juridica.xlsx")
