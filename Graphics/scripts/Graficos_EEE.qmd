@@ -23,14 +23,14 @@ for (p in bibliotecas) {
 #| label: Funcoes
 #| echo: false
 
-source("R/normalizacao.R") 
-source("R/quant_fatores.R") 
-source("R/Bartlett.R") 
-source("R/sentido.R") 
-source("R/fatores.R") 
-source("R/Score.R") 
+source("../functions/normalizacao.R")
+source("../functions/quant_fatores.R")
+source("../functions/Bartlett.R")
+source("../functions/sentido.R")
+source("../functions/fatores.R")
+source("../functions/Score.R")
 
-Data <- "data/"
+Data <- "../data/"
 
 ```
 
