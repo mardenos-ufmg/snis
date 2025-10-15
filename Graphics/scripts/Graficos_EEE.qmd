@@ -80,7 +80,7 @@ scores_finaisEEE <- Score(
   rotacao = 'oblimin',       # Tipo de rotação
   verbose = TRUE             # Imprime informações e plots
 )
-print(scores_finais)
+print(scores_finaisEEE)
 ```
 
 ## Comparação com anterior (voltar para ver os scores corretamente)
@@ -160,7 +160,7 @@ print(ordenado_final)
 
 ```{r}
 #| echo: false
-if (nrow(df) != nrow(scores_finais)) {
+if (nrow(df) != nrow(scores_finaisEEE)) {
   warning("⚠️ O número de linhas de 'df' e 'scores_finais' é diferente. 
 Verifique se estão na mesma ordem e com o mesmo tamanho antes de combinar.")
 }
@@ -536,7 +536,7 @@ df_MG <- df_MG %>%
 ```{r}
 #| echo: false
 #| label: Preparação do GeoJSON
-geojson_path <- paste0(DataIC, "geojs-31-mun.json")
+geojson_path <- paste0(Data, "geojs-31-mun.json")
 
 geo_data_sf <- sf::st_read(geojson_path, quiet = TRUE) 
 
@@ -612,7 +612,7 @@ criar_mapa_interativo <- function(df, geojson_path, coluna_score, titulo) {
   return(mapa)
 }
 
-geojson_path <- paste0(DataIC, "geojs-31-mun.json")
+geojson_path <- paste0(Data, "geojs-31-mun.json")
 
 #Gera cada um dos mapas
 mapa_score <- criar_mapa_interativo(df_MG, geojson_path, "Score", "Score Geral")
