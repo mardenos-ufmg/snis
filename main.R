@@ -13,14 +13,9 @@ df <- df %>%
 
 
 
-
-Passo 2 — Carregue e importe o arquivo Python
-
-library(reticulate)
-
-# Carrega o módulo Python (sem a extensão .py)
-reticulate::source_python("final.py")
-
-
-fa_EEE <- fa(df)
-
+# set.seed(123)
+# input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
+# 
+# set.seed(123)
+# input2 = mice::mice(df[,numerico2],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
+# 
