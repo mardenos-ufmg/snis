@@ -3,19 +3,27 @@
 # normalizar_score = TRUE
 fa2 = function(
     year,
-    features = readODS::read_ods("data/features.ods"),
+    df,
+    features = readODS::read_ods("data/features.ods", sheet = "EEE"),
     delta = 0.05
     ) {
   
-  df = process_data(year)
+  if (!missing(year) && !missing(df)) {
+    stop("Apenas um dos argumentos deve ser fornecido: year ou df, não ambos.")
+  }
+  
+  if (!missing(year)) {
+    df = process_data(year)
+  }
+  
   FA = list()
   
-  for (grupo_nome in unique(features$`Grupo DH`)) {
+  for (grupo_nome in unique(features$Grupo)) {
     
     variaveis =
       features |>
-      dplyr::filter(.data$`Grupo DH` == grupo_nome) |>
-      pull(Variável)
+      dplyr::filter(.data$Grupo == grupo_nome) |>
+      purrr::pluck("Variável")
     
     dados =
       df |>
@@ -36,7 +44,7 @@ fa2 = function(
       purrr::pluck("values")
       
     quant_fatores = sum(autovalores > 1 - delta)
-    loadings = fa(dados, nfactors = quant_fatores, rotate = rotacao, fm = "minres")
+    loadings = fa(dados, nfactors = quant_fatores, fm = "minres")
     scores   = psych::factor.scores(dados, loadings, method = "regression")
     
     loadings_df =
@@ -45,7 +53,8 @@ fa2 = function(
       tibble::as_tibble() |>
       dplyr::mutate(
         Variável = variaveis
-      )
+      ) |>
+      dplyr::relocate(Variável)
 
     scores_df =
       scores$scores |>
@@ -58,25 +67,30 @@ fa2 = function(
           .cols = !!grupo_nome,
           .fns = ~ pnorm(., mean = mean(.), sd = sd(.))
         )
-      )
+      ) |>
+      dplyr::relocate(c(`Código Município`, !!grupo_nome))
         
     FA[[grupo_nome]] =
       list(
         scores   = scores_df,
-        loadings = loadings_df
+        loadings = loadings_df,
+        original = 
+          list(
+            scores   = scores,
+            loadings = loadings
+            )
         )
   }
   
-  scores =
-    lapply(FA, function(x) x$scores[,ncol(x$scores)-1] |> purrr::pluck(1)) |>
+  FA[["Scores"]] =
+    lapply(FA, function(x) x$scores[,2] |> purrr::pluck(1)) |>
     tibble::as_tibble() |>
     mutate(
       `Score Médio` = round(rowMeans(across(everything()), na.rm = TRUE), 3),
       `Código Município` = df$`Código do Município`
       )
   
-  list(
-    geral = scores,
-    FA    = FA
-    )
+  class(FA) = "FA-snis"
+  
+  FA
 }

@@ -1,8 +1,22 @@
-plot_score = function(year) {
+plot_score = function(year, df) {
+  if (!missing(year) && !missing(FA)) {
+    stop("Apenas um dos argumentos deve ser fornecido: year ou FA, não ambos.")
+  }
+  if (!missing(year)) {
+    FA = fa2(year)
+  }
+  
   
 }
 
-plot_loading = function(year) {
+plot_loading = function(year, FA) {
+  if (!missing(year) && !missing(FA)) {
+    stop("Apenas um dos argumentos deve ser fornecido: year ou FA, não ambos.")
+  }
+  if (!missing(year)) {
+    FA = fa2(year)
+  }
+  
   plot_list = list()
   
   
