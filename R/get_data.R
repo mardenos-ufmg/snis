@@ -5,7 +5,6 @@
 
 read = function(year) {
   stopifnot("Ano deve estar entre 2010 e 2022" = year %in% 2010:2022)
-  
   # dados retirados de https://app4.cidades.gov.br/serieHistorica/
   
   ibge =
@@ -22,7 +21,7 @@ read = function(year) {
                    "Código da Região Imediata",
                    "Região Imediata")) |>
     dplyr::mutate(
-      "Código do Município" = substr(.data$"Código do Município", 1, 6)
+      prefix = substr(.data$"Código do Município", 1, 6)
     ) |>
     suppressWarnings() |>
     suppressMessages()
@@ -61,7 +60,10 @@ read = function(year) {
                        ))
     }}() |>
     mutate(across(where(is.character), stringr::str_trim)) |>
-    dplyr::left_join(ibge, by = "Código do Município")
+    dplyr::left_join(ibge, by = c("Código do Município" = "prefix")) |>
+    dplyr::select(-all_of("Código do Município")) |>
+    dplyr::rename("Código do Município" = "Código do Município.y") |>
+    dplyr::relocate("Código do Município")
 }
 
 

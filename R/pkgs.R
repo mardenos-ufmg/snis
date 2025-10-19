@@ -14,6 +14,8 @@ pkgs = c(
   "readODS",
   "ggridges",
   "sf",
+  "stringr",
+  "geobr",
   "tmap"
 )
 

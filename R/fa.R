@@ -1,6 +1,7 @@
 # falta sentido
-# rotacao = 'oblimin',
-# normalizar_score = TRUE
+# falta rotacao = 'oblimin',
+# falta normalizar_score
+# falta códigos de anos passados
 fa2 = function(
     year,
     df,
@@ -47,7 +48,7 @@ fa2 = function(
     loadings = fa(dados, nfactors = quant_fatores, fm = "minres")
     scores   = psych::factor.scores(dados, loadings, method = "regression")
     
-    loadings_df =
+    loadings$df =
       loadings$loadings |>
       unclass() |>
       tibble::as_tibble() |>
@@ -56,39 +57,35 @@ fa2 = function(
       ) |>
       dplyr::relocate(Variável)
 
-    scores_df =
+    scores$df =
       scores$scores |>
       tibble::as_tibble() |>
       mutate() |>
       dplyr::mutate(
         !!grupo_nome := rowSums(across(everything()), na.rm = TRUE),
-        `Código Município` = df$`Código do Município`,
+        `Código do  Município` = df$`Código do Município`,
         across(
           .cols = !!grupo_nome,
           .fns = ~ pnorm(., mean = mean(.), sd = sd(.))
         )
       ) |>
-      dplyr::relocate(c(`Código Município`, !!grupo_nome))
+      dplyr::relocate(c(`Código do  Município`, !!grupo_nome))
         
     FA[[grupo_nome]] =
       list(
-        scores   = scores_df,
-        loadings = loadings_df,
-        original = 
-          list(
-            scores   = scores,
-            loadings = loadings
-            )
-        )
+        scores   = scores,
+        loadings = loadings
+      )
   }
   
-  FA[["Scores"]] =
-    lapply(FA, function(x) x$scores[,2] |> purrr::pluck(1)) |>
+  FA$Geral$Scores =
+    lapply(FA, function(x) x$scores$df[,2] |> purrr::pluck(1)) |>
     tibble::as_tibble() |>
     mutate(
       `Score Médio` = round(rowMeans(across(everything()), na.rm = TRUE), 3),
-      `Código Município` = df$`Código do Município`
-      )
+      `Código do Município` = df$`Código do Município`
+      ) |>
+    dplyr::relocate(c(`Código do Município`, `Score Médio`))
   
   class(FA) = "FA-snis"
   
