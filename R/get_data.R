@@ -26,7 +26,8 @@ read = function(year) {
     suppressWarnings() |>
     suppressMessages()
   
-  paste0("data/Desagregado-", year, ".csv") |>
+  df =
+    paste0("data/Desagregado-", year, ".csv") |>
     file(encoding = "UTF-16LE") |>
     readLines() |>
     {\(.) sub(";\\s*$", "", .)}() |>
@@ -63,7 +64,13 @@ read = function(year) {
     dplyr::left_join(ibge, by = c("Código do Município" = "prefix")) |>
     dplyr::select(-all_of("Código do Município")) |>
     dplyr::rename("Código do Município" = "Código do Município.y") |>
-    dplyr::relocate("Código do Município")
+    dplyr::relocate("Código do Município") |>
+    dplyr::relocate(c("Código da Região Intermediária", "Região Intermediária", "Código da Região Imediata", "Região Imediata"), .after = "Natureza jurídica") |>
+    dplyr::relocate(c("POP_TOT", "POP_URB"), .after = "Região Imediata")
+  
+  colnames(df)[1:14] = tolower(colnames(df)[1:14])
+  
+  df
 }
 
 
@@ -76,19 +83,19 @@ process_data = function(year) {
     read(year) |>
     dplyr::select(
       all_of(c(
-        "Natureza jurídica","Tipo de serviço","Abrangência","Município", "Código do Município",
-        "Região Intermediária", "Código do Prestador","Prestador","POP_URB","POP_TOT",
+        "natureza jurídica","tipo de serviço","abrangência","município", "código do município",
+        "código da região intermediária", "região intermediária", "código do prestador","prestador","POP_URB","POP_TOT",
         "IN002","IN031","IN101","IN049","IN019","IN023","IN024",
         "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
         "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
         "AG013","AG022","IN006","IN016","IN047","ES006","ES005"
       ))
     ) |>
-    dplyr::filter(.data$"Tipo de serviço" != "Esgotos") |>
+    dplyr::filter(.data$"tipo de serviço" != "Esgotos") |>
     mutate(
       across(c("IN006","IN016","IN047","IN015"),
              ~ case_when(
-               is.na(.) & .data$`Tipo de serviço` == "Água" ~ 0, 
+               is.na(.) & .data$`tipo de serviço` == "Água" ~ 0, 
                TRUE ~ .
              )
       )
@@ -117,9 +124,9 @@ process_data = function(year) {
         .data$AG022 > .data$AG013 ~ .data$AG013,
         TRUE ~ .data$AG022
       ),
-      Tarifa      = .data$IN004 / .data$IN003,
-      Micromedida = .data$AG013 - .data$AG022,
-      Urbanização = .data$POP_URB / .data$POP_TOT
+      tarifa      = .data$IN004 / .data$IN003,
+      micromedida = .data$AG013 - .data$AG022,
+      urbanização = .data$POP_URB / .data$POP_TOT
     )
   
   # qtde_n_micromedida  VIROU Micromedida
@@ -129,27 +136,27 @@ process_data = function(year) {
     df[,!(names(df) %in% numerico)] |>
     cbind(df_input) |>
     mutate(
-      Prestador2 =
+      prestador2 =
         case_when(
-          .data$`Natureza jurídica` == "Empresa pública" ~ "COPANOR",
-          .data$`Natureza jurídica` == "Sociedade de economia mista com administração pública" ~ "COPASA",
-          .data$`Natureza jurídica` == "Autarquia" ~ "Autarquia",
-          .data$`Natureza jurídica` == "Administração pública direta" ~ "Prefeitura",
-          .data$`Natureza jurídica` == "Empresa privada" ~ "Empresa privada"
+          .data$`natureza jurídica` == "Empresa pública" ~ "COPANOR",
+          .data$`natureza jurídica` == "Sociedade de economia mista com administração pública" ~ "COPASA",
+          .data$`natureza jurídica` == "Autarquia" ~ "Autarquia",
+          .data$`natureza jurídica` == "Administração pública direta" ~ "Prefeitura",
+          .data$`natureza jurídica` == "Empresa privada" ~ "Empresa privada"
         )
     )
     
   municipios_duplicados =
-    read_excel("data2/municipios_duplicados_natureza_juridica.xlsx") |>
+    readxl::read_excel("data2/municipios_duplicados_natureza_juridica.xlsx") |>
     mutate(
       id = paste(.data$Nome_Município, "+", .data$Prestador2)
     )
   
   municipios_filter =
     df |>
-    filter(.data$Município %in% municipios_duplicados$Nome_Município) |>
+    filter(.data$município %in% municipios_duplicados$Nome_Município) |>
     mutate(
-      id = paste(.data$Município,"+",.data$Prestador2)
+      id = paste(.data$município,"+",.data$prestador2)
     ) |>
     filter(
       .data$id %in% municipios_duplicados$id
@@ -158,7 +165,7 @@ process_data = function(year) {
   
   df =
     df |>
-    dplyr::filter(!(.data$Município %in% municipios_duplicados$Nome_Município)) |>
+    dplyr::filter(!(.data$município %in% municipios_duplicados$Nome_Município)) |>
     rbind(municipios_filter) |>
     tibble::as_tibble()
   

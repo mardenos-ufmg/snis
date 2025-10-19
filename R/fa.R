@@ -2,29 +2,25 @@
 # falta rotacao = 'oblimin',
 # falta normalizar_score
 # falta códigos de anos passados
-fa2 = function(
-    year,
+fa = function(
     df,
     features = readODS::read_ods("data/features.ods", sheet = "EEE"),
     delta = 0.05
     ) {
-  
-  if (!missing(year) && !missing(df)) {
-    stop("Apenas um dos argumentos deve ser fornecido: year ou df, não ambos.")
-  }
-  
-  if (!missing(year)) {
-    df = process_data(year)
-  }
-  
+  features =
+    features |>
+    `colnames<-`(c("variavel", "grupo")) |>
+    dplyr::mutate(
+      grupo = tolower(grupo)
+    )
   FA = list()
   
-  for (grupo_nome in unique(features$Grupo)) {
+  for (grupo_nome in unique(features$grupo)) {
     
     variaveis =
       features |>
-      dplyr::filter(.data$Grupo == grupo_nome) |>
-      purrr::pluck("Variável")
+      dplyr::filter(.data$grupo == grupo_nome) |>
+      purrr::pluck("variavel")
     
     dados =
       df |>
@@ -45,7 +41,7 @@ fa2 = function(
       purrr::pluck("values")
       
     quant_fatores = sum(autovalores > 1 - delta)
-    loadings = fa(dados, nfactors = quant_fatores, fm = "minres")
+    loadings = psych::fa(dados, nfactors = quant_fatores, fm = "minres")
     scores   = psych::factor.scores(dados, loadings, method = "regression")
     
     loadings$df =
@@ -53,24 +49,25 @@ fa2 = function(
       unclass() |>
       tibble::as_tibble() |>
       dplyr::mutate(
-        Variável = variaveis
+        variável = variaveis
       ) |>
-      dplyr::relocate(Variável)
-
+      dplyr::relocate(variável)
+    
     scores$df =
       scores$scores |>
       tibble::as_tibble() |>
       mutate() |>
       dplyr::mutate(
         !!grupo_nome := rowSums(across(everything()), na.rm = TRUE),
-        `Código do  Município` = df$`Código do Município`,
+        `código do município` = df$`código do município`,
         across(
           .cols = !!grupo_nome,
           .fns = ~ pnorm(., mean = mean(.), sd = sd(.))
         )
       ) |>
-      dplyr::relocate(c(`Código do  Município`, !!grupo_nome))
-        
+      dplyr::relocate(c(`código do município`, !!grupo_nome))
+    
+    
     FA[[grupo_nome]] =
       list(
         scores   = scores,
@@ -78,16 +75,16 @@ fa2 = function(
       )
   }
   
-  FA$Geral$Scores =
+  FA$geral$scores =
     lapply(FA, function(x) x$scores$df[,2] |> purrr::pluck(1)) |>
     tibble::as_tibble() |>
     mutate(
-      `Score Médio` = round(rowMeans(across(everything()), na.rm = TRUE), 3),
-      `Código do Município` = df$`Código do Município`
+      `médio` = round(rowMeans(across(everything()), na.rm = TRUE), 3),
+      `código do município` = df$`código do município`
       ) |>
-    dplyr::relocate(c(`Código do Município`, `Score Médio`))
+    dplyr::relocate(c(`código do município`, `médio`))
   
-  class(FA) = "FA-snis"
+  class(FA) = "fa-snis"
   
   FA
 }
