@@ -6,7 +6,7 @@
 read = function(year) {
   stopifnot("Ano deve estar entre 2010 e 2022" = year %in% 2010:2022)
   # dados retirados de https://app4.cidades.gov.br/serieHistorica/
-  
+
   ibge =
     readxl::read_xls("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.xls", skip = 6) |>
     #read.csv(file("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", encoding = "ASCII")) |>
@@ -25,7 +25,7 @@ read = function(year) {
     ) |>
     suppressWarnings() |>
     suppressMessages()
-  
+
   df =
     paste0("data/Desagregado-", year, ".csv") |>
     file(encoding = "UTF-16LE") |>
@@ -67,9 +67,9 @@ read = function(year) {
     dplyr::relocate("Código do Município") |>
     dplyr::relocate(c("Código da Região Intermediária", "Região Intermediária", "Código da Região Imediata", "Região Imediata"), .after = "Natureza jurídica") |>
     dplyr::relocate(c("POP_TOT", "POP_URB"), .after = "Região Imediata")
-  
+
   colnames(df)[1:14] = tolower(colnames(df)[1:14])
-  
+
   df
 }
 
@@ -95,13 +95,13 @@ process_data = function(year) {
     mutate(
       across(c("IN006","IN016","IN047","IN015"),
              ~ case_when(
-               is.na(.) & .data$`tipo de serviço` == "Água" ~ 0, 
+               is.na(.) & .data$`tipo de serviço` == "Água" ~ 0,
                TRUE ~ .
              )
       )
     )
-  
-  #IN024 tem multicolinearidade com IN047 
+
+  #IN024 tem multicolinearidade com IN047
   #AG022 tem multicolineadidade com AG013
   #### Excluindo IN047 e AG013 para imputar IN024 e AG022
   numerico2 = c(
@@ -111,10 +111,10 @@ process_data = function(year) {
     "IN015","IN009","IN013","IN029","IN058","IN004","IN003"
   )
   numerico = c(numerico2, "AG013", "IN047")
-  
+
   input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
   input2 = mice::mice(df[,numerico2], m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |>suppressWarnings()
-  
+
   df_input =
     input1 |>
     mutate(
@@ -128,10 +128,10 @@ process_data = function(year) {
       micromedida = .data$AG013 - .data$AG022,
       urbanização = .data$POP_URB / .data$POP_TOT
     )
-  
+
   # qtde_n_micromedida  VIROU Micromedida
   # grau_urbanizacao    VIROU Urbanização
-  
+
   df =
     df[,!(names(df) %in% numerico)] |>
     cbind(df_input) |>
@@ -145,16 +145,16 @@ process_data = function(year) {
           .data$`natureza jurídica` == "Empresa privada" ~ "Empresa privada"
         )
     )
-    
+
   municipios_duplicados =
-    readxl::read_excel("data2/municipios_duplicados_natureza_juridica.xlsx") |>
+    readODS::read_ods("data/duplicatas.ods") |>
     mutate(
-      id = paste(.data$Nome_Município, "+", .data$Prestador2)
+      id = paste(.data$município, "+", .data$prestador2)
     )
-  
+
   municipios_filter =
     df |>
-    filter(.data$município %in% municipios_duplicados$Nome_Município) |>
+    filter(.data$município %in% municipios_duplicados$município) |>
     mutate(
       id = paste(.data$município,"+",.data$prestador2)
     ) |>
@@ -162,12 +162,12 @@ process_data = function(year) {
       .data$id %in% municipios_duplicados$id
     ) |>
     select(-all_of("id"))
-  
+
   df =
     df |>
-    dplyr::filter(!(.data$município %in% municipios_duplicados$Nome_Município)) |>
+    dplyr::filter(!(.data$município %in% municipios_duplicados$município)) |>
     rbind(municipios_filter) |>
     tibble::as_tibble()
-  
+
   df
 }
