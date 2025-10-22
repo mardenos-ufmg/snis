@@ -17,9 +17,31 @@ plot_map(df_, "score médio eee", T)
 plot_loading(FA_EEE)
 plot_loading(FA_SU)
 
+dfs = list()
+for (ano in 2010:2021) {
+  set.seed(12345)
+  cat("\nProcessando ano", ano, "... ")
+  df = tryCatch(
+    {
+      process_data(ano)
+    },
+    error = function(e) {
+      cat("falhou:", conditionMessage(e))
+      return(NULL)
+    }
+  )
+  if (is.null(df)) next
+
+  FA_EEE = fa(df)
+  FA_SU  = fa(df, features = readODS::read_ods("data/features.ods", sheet = "SU"))
+  dfs[[as.character(ano)]] = update_df_fa(df, FA_EEE, FA_SU)
+}
+saveRDS(dfs, "data/dfs.rds")
+
+
 
 # set.seed(123)
 # input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
-# 
+#
 # set.seed(123)
 # input2 = mice::mice(df[,numerico2],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()

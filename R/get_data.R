@@ -112,8 +112,8 @@ process_data = function(year) {
   )
   numerico = c(numerico2, "AG013", "IN047")
 
-  input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
-  input2 = mice::mice(df[,numerico2], m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |>suppressWarnings()
+  input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |> suppressWarnings()
+  input2 = mice::mice(df[,numerico2], m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |>suppressWarnings()
 
   df_input =
     input1 |>
@@ -167,7 +167,8 @@ process_data = function(year) {
     df |>
     dplyr::filter(!(.data$município %in% municipios_duplicados$município)) |>
     rbind(municipios_filter) |>
-    tibble::as_tibble()
+    tibble::as_tibble() |>
+    relocate(c("tarifa", "micromedida", "urbanização", "prestador2"))
 
   df
 }

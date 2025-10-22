@@ -8,3 +8,27 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Depends: 
+    R (>= 4.0.0),
+    ggplot2,
+    shiny,
+    tidyverse
+Imports:
+    readxl,
+    mice,
+    tidyr,
+    dplyr,
+    writexl,
+    psych,
+    stringr,
+    readr,
+    readODS,
+    ggridges,
+    sf,
+    geobr,
+    tmap
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat
+

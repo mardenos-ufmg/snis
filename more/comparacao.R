@@ -43,13 +43,13 @@ dados_input[numerico] <- sapply(dados_input[numerico],as.numeric)
 
 
 #impute missing values, using all parameters as default values
-set.seed(12345)
-dados_input.imp <- mice::mice(dados_input,m=5,method = "cart")
+#set.seed(12345)
+dados_input.imp <- mice::mice(dados_input,m=5,method = "cart", seed = 1)
 a <- complete(dados_input.imp)
 
 #### checando colinearidade
-mice:::find.collinear(dados_input)
-cor(dados_input, use = "pairwise.complete.obs")
+# mice:::find.collinear(dados_input)
+# cor(dados_input, use = "pairwise.complete.obs")
 
 #IN024 tem multicolinearidade com IN047
 #AG022 tem multicolineadidade com AG013
@@ -61,8 +61,8 @@ numerico2 <- c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
               "POP_TOT","IN006","IN016","AG022")
 dados_input2 <- a[,numerico2]
 
-set.seed(12345)
-dados_input2.imp <- mice::mice(dados_input2,m=5,method = "cart")
+#set.seed(12345)
+dados_input2.imp <- mice::mice(dados_input2,m=5,method = "cart", seed = 1)
 a2 <- complete(dados_input2.imp)
 
 ## juntando
