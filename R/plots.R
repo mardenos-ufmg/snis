@@ -13,7 +13,8 @@ plot_map = function(df, var, quart = F) {
 
   mapa =
     readRDS("data/map_MG.rds") |>
-    dplyr::left_join(df, by = c("code_muni" = "código do município"))
+    dplyr::left_join(df, by = c("code_muni" = "código do município")) |>
+    sf::st_as_sf() #Juntar o código pelos municípios
 
   ggplot(mapa) +
     geom_sf(aes(fill = .data[["var"]]), color = NA) +
