@@ -32,3 +32,4 @@ Suggests:
     rmarkdown,
     testthat
 VignetteBuilder: knitr
+URL: https://mardenos-ufmg.github.io/snis/
