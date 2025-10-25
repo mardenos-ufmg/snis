@@ -13,7 +13,7 @@ Sempre que houver uma alteração no pacote será necessário repetir o procedim
 
 Como o pacote está em desenvolvimento e em constante mudança, esse método é recomendado.
 Primeiro é necessário baixar a pasta do nosso repositório no GitHub.
-O jeito mais fácil é acessando o [nosso repositório no GitHub](`https://github.com/mardenos-ufmg/snis`) e clicando no botão verde escrito `code` e em seguida `Download Zip`.
+O jeito mais fácil é acessando o [nosso repositório no GitHub](https://github.com/mardenos-ufmg/snis) e clicando no botão verde escrito `code` e em seguida `Download Zip`.
 Em seguida faça a descompressão (unzip) da pasta e instale o `devtools` via R no seu PC.
 
 ``` r
