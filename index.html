@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>What the Package Does (One Line, Title Case) • snis</title>
+<title>Página inicial • snis</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="What the Package Does (One Line, Title Case)">
-<meta name="description" content="What the package does (one paragraph).">
-<meta property="og:description" content="What the package does (one paragraph).">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Página inicial">
+<meta name="description" content="Documentação do pacote SNIS">
+<meta property="og:description" content="Documentação do pacote SNIS">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,13 +31,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/leitura-dados.html">leitura-dados</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="index.html">Início</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Funções</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/index.html">Tutoriais</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -50,9 +46,42 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-What the package does (one paragraph).
-  </main><aside class="col-md-3"><div class="license">
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="snis">SNIS<a class="anchor" aria-label="anchor" href="#snis"></a>
+</h1></div>
+<p>Esse pacote tem por objetivo formalizar e disponibilizar funções para a leitura e análise de dados do SNIS (Sistema Nacional de Informações sobre Saneamento). As funções estão documentadas e há algumas vinhetas que ajudam a entender o funcionamento do pacote. Isso está disponível no <a href="https://mardenos-ufmg.github.io/snis/">site do pacote</a>.</p>
+<p>Para utilizar o pacote, siga alguma das opções abaixo. Em ambos os casos é interessante instalar o pacote <code>pak</code> em seu ambiente R via <code>install.packages("pak")</code> e usar o <a href="https://posit.co/download/rstudio-desktop/" class="external-link">RStudio</a>. Sempre que houver uma alteração no pacote será necessário repetir o procedimento para usufruir das atualizações.</p>
+<div class="section level2">
+<h2 id="via-devtools">Via <code>devtools</code>
+<a class="anchor" aria-label="anchor" href="#via-devtools"></a>
+</h2>
+<p>Como o pacote está em desenvolvimento e em constante mudança, esse método é recomendado. Primeiro é necessário baixar a pasta do nosso repositório no GitHub. O jeito mais fácil é acessando o <a href="%60https://github.com/mardenos-ufmg/snis%60" class="external-link">nosso repositório no GitHub</a> e clicando no botão verde escrito <code>code</code> e em seguida <code>Download Zip</code>. Em seguida faça a descompressão (unzip) da pasta e instale o <code>devtools</code> via R no seu PC.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span></code></pre></div>
+<p>ou, preferencialmente</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span></code></pre></div>
+<p>Em seguida abra o repositório <code>snis</code> descompactado em seu PC e clique em <code>snis.Rproj</code>. Isso iniciará uma sessão do RStudio com o projeto já aberto. Finalmente, rode no console do RStudio o comando <code>devtools::load_all()</code> e você poderá usar todas as funções do nosso pacote!</p>
+</div>
+<div class="section level2">
+<h2 id="via-pak">Via <code>pak</code>
+<a class="anchor" aria-label="anchor" href="#via-pak"></a>
+</h2>
+<p>Instale o <code>pak</code> em seu ambiente R e, em seguida, instale o <code>snis</code> via <code>pak</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"mardenos-ufmg/snis"</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/mardenos-ufmg/snis" class="external-link">Repositório no GitHub</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
@@ -71,7 +100,7 @@ What the package does (one paragraph).
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>First Last <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Carlos de Moura <br><small class="roles"> Author, maintainer </small>   </li>
 </ul>
 </div>
 
@@ -82,7 +111,7 @@ What the package does (one paragraph).
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Desenvolvido por MarDeNós-UFMG</p>
 </div>
 
 <div class="pkgdown-footer-right">
