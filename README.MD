@@ -31,7 +31,7 @@ Em seguida abra o repositório `snis` descompactado em seu PC e clique em `snis.
 Isso iniciará uma sessão do RStudio com o projeto já aberto.
 Finalmente, rode no console do RStudio o comando `devtools::load_all()` e você poderá usar todas as funções do nosso pacote!
 
-## Via `pak
+## Via `pak`
 
 Instale o `pak` em seu ambiente R e, em seguida, instale o `snis` via `pak`.
 
