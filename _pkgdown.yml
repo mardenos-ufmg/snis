@@ -1,4 +1,31 @@
 url: https://mardenos-ufmg.github.io/snis/
 template:
   bootstrap: 5
+  lang: pt-BR
 
+home:
+  title: "Página inicial"
+  description: "Documentação do pacote SNIS"
+  links:
+    - text: "Repositório no GitHub"
+      href: "https://github.com/mardenos-ufmg/snis"
+
+navbar:
+  structure:
+    left: [home, reference, articles]
+  components:
+    home:
+      text: "Início"
+      href: index.html
+    reference:
+      text: "Funções"
+      href: reference/index.html
+    articles:
+      text: "Tutoriais"
+      href: articles/index.html
+
+footer:
+  structure:
+    left: [developed_by]
+  components:
+    developed_by: "Desenvolvido por MarDeNós-UFMG"
