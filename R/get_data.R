@@ -31,6 +31,7 @@ read = function(ano) {
 
   colnames =
     paste0("data/Desagregado-", ano, ".csv") |>
+    #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines(1) |>
     strsplit(";") |>
@@ -41,6 +42,7 @@ read = function(ano) {
 
   df =
     paste0("data/Desagregado-", ano, ".csv") |>
+    #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines() |>
     {\(.) .[2:(length(.)-1)] }() |>
@@ -93,9 +95,11 @@ read = function(ano) {
 #' @export
 process_data = function(ano) {
   cols = c(
-    "ano de referência","natureza jurídica","tipo de serviço","abrangência","município",
-    "código do município","código da região intermediária", "região intermediária",
-    "código do prestador","prestador","POP_URB","POP_TOT",
+    "ano de referência","município","código do município",
+    "natureza jurídica","tipo de serviço","abrangência",
+    "código do prestador","prestador",
+    "código da região intermediária","região intermediária","código da região imediata", "região imediata",
+    "POP_URB","POP_TOT",
     "IN002","IN031","IN101","IN049","IN019","IN023","IN024",
     "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
     "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
@@ -180,7 +184,7 @@ process_data = function(ano) {
     filter(!(.data$município %in% municipios_duplicados$município)) |>
     rbind(municipios_filter) |>
     tibble::as_tibble() |>
-    relocate(c("tarifa", "micromedida", "urbanização", "prestador2"))
+    relocate(c("prestador2", "tarifa", "micromedida", "urbanização"), .after = "prestador")
 
   df
 }

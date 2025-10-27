@@ -1,3 +1,13 @@
+#' Title
+#'
+#' @param df
+#' @param var
+#' @param quart
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 plot_map = function(df, var, quart = F) {
   df =
     df[c("código do município", var)] |>
@@ -29,6 +39,14 @@ plot_map = function(df, var, quart = F) {
     theme_void()
 }
 
+#' Title
+#'
+#' @param FA
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 plot_loading = function(FA) {
   plot_list = list()
   grupos = colnames(FA$geral$scores)[-(1:2)]
@@ -57,6 +75,15 @@ plot_loading = function(FA) {
   gridExtra::grid.arrange(grobs = plot_list, ncol = length(grupos))
 }
 
+#' Title
+#'
+#' @param df
+#' @param top_n
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 table_ranking <- function(df, top_n = NULL) {
 
   df_score <- df %>%
@@ -93,6 +120,16 @@ table_ranking <- function(df, top_n = NULL) {
 }
 
 #Imprime as melhores e piores cidades com base no ranking
+#' Title
+#'
+#' @param df
+#' @param top_n
+#' @param bottom_n
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 table_top_bottom <- function(df, top_n = 10, bottom_n = 10) {
   df_aux <- df %>%
     dplyr::group_by(município, `natureza jurídica`) %>%
@@ -133,6 +170,18 @@ table_top_bottom <- function(df, top_n = 10, bottom_n = 10) {
 }
 
 #Imprime boxplot para a variavel selecionada
+#' Title
+#'
+#' @param df
+#' @param score_col
+#' @param group_col
+#' @param titulo
+#' @param cor_paleta
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 plot_boxplot <- function(df,
                          score_col = "score médio eee",
                          group_col = "tipo de serviço",
@@ -184,6 +233,19 @@ plot_boxplot <- function(df,
 }
 
 #Faz um grafico de barras com a mediana
+#' Title
+#'
+#' @param df
+#' @param score_col
+#' @param group_col
+#' @param titulo
+#' @param casas_decimais
+#' @param cor_paleta
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 plot_median_barplot <- function(df,
                                 score_col = "score médio eee",
                                 group_col = "natureza jurídica",
@@ -254,6 +316,17 @@ plot_median_barplot <- function(df,
 }
 
 #Gara o grafico de "ondas"
+#' Title
+#'
+#' @param df
+#' @param group_col
+#' @param score_cols
+#' @param titulo
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 plot_ridge_scores <- function(df, group_col, score_cols, titulo = NULL) {
 
   todas_colunas <- c(group_col, score_cols)
@@ -301,6 +374,16 @@ plot_ridge_scores <- function(df, group_col, score_cols, titulo = NULL) {
   print(ridge_plot)
 }
 
+#' Title
+#'
+#' @param df
+#' @param score_col
+#' @param group_col
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 table_median <- function(df, score_col = "score médio eee", group_col = "Nome_Mesorregião") {
 
   if (!all(c(score_col, group_col) %in% colnames(df))) {

@@ -23,7 +23,7 @@ install.packages("devtools")
 ou, preferencialmente
 
 ``` r
-install.packages("pak")
+if !("pak" %in% rownames(installed.packages())) install.packages("pak")
 pak::pak("devtools")
 ```
 
@@ -36,6 +36,6 @@ Finalmente, rode no console do RStudio o comando `devtools::load_all()` e você 
 Instale o `pak` em seu ambiente R e, em seguida, instale o `snis` via `pak`.
 
 ``` r
-install.packages("pak")
+if !("pak" %in% rownames(installed.packages())) install.packages("pak")
 pak::pak("mardenos-ufmg/snis")
 ```

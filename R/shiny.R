@@ -1,5 +1,5 @@
 shiny = function() {
-  header_col = function(title, color, height, width) {
+  header_col = function(title, color, height, width = 12) {
     column(width,
            div(
              style = paste0(
@@ -19,44 +19,69 @@ shiny = function() {
 
   dfs = readRDS("data/dfs.rds")
 
-  #########################
-  #####  Panel Plots  #####
-  #########################
+  ##########################
+  #####  Panel Tabela  #####
+  ##########################
+  PanelTabela = tabPanel(
+    title = "Tabela",
 
-  PanelPlots = tabPanel(
-    title = "Plots",
-
-    fluidRow(header_col("Plots", "#87C2CC", 12, 12)),
+    fluidRow(header_col("Dados", "#87C2CC", 12)),
     fluidRow(
-      selectInput("plots-ano", label = "Ano", choices = as.character(2010:2021)),
+      tableOutput("tabela-tabela")
     ),
-
-    fluidRow(header_col("Scores", "#a8f2fe", 8, 12)),
-
-    fluidRow(
-      selectInput("plots-scores-var", label = "Variável", choices = ""),
-      checkboxInput("plots-scores-quart", "Quaris", value = FALSE),
-      column(8,
-        plotly::plotlyOutput("plots-scores-mapa"),
-      ),
-      column(4,
-        tableOutput("plots-scores-summary")
-      )
-    ),
-
-    fluidRow(header_col("Loadings", "#a8f2fe", 8, 12)),
 
     fluidRow(
       column(7,
-        fluidRow(header_col("EEE", "#a8f2fe", 8, 12)),
-        plotOutput("plots-loadings-eee")
+        fluidRow(header_col("Mapa", "#a8f2fe", 8)),
+        plotOutput("tabela-mapa")
       ),
       column(5,
-        fluidRow(header_col("SU", "#a8f2fe", 8, 12)),
-        plotOutput("plots-loadings-su")
+        fluidRow(header_col("Resumo", "#a8f2fe", 8)),
+        plotOutput("tabela-resumo")
       )
     )
+  )
 
+  ######################
+  #####  Panel FA  #####
+  ######################
+  PanelFA = tabPanel(
+    title = "Plots",
+
+    fluidRow(header_col("Scores", "#a8f2fe", 8)),
+
+    fluidRow(
+      div(
+        style = "display: inline-block; width: 200px; margin-right: 20px;",
+        selectInput("fa-scores-var", label = "Variável", choices = "")
+      ),
+      div(
+        style = "display: inline-block; margin-top: 25px;",
+        checkboxInput("fa-scores-quart", "Quartis", value = TRUE)
+      )
+    ),
+
+    fluidRow(
+      column(8,
+        plotly::plotlyOutput("fa-scores-mapa")
+      ),
+      column(4,
+        tableOutput("fa-scores-summary")
+      )
+    ),
+
+    fluidRow(header_col("Loadings", "#a8f2fe", 8)),
+
+    fluidRow(
+      column(7,
+        fluidRow(header_col("EEE", "#a8f2fe", 8)),
+        plotOutput("fa-loadings-eee")
+      ),
+      column(5,
+        fluidRow(header_col("SU", "#a8f2fe", 8)),
+        plotOutput("fa-loadings-su")
+      )
+    )
   )
 
   ####################
@@ -64,24 +89,25 @@ shiny = function() {
   ####################
   shiny_server = function(input, output, session) {
 
-    ano   = reactive({ input$"plots-ano" })
-    var   = reactive({ input$"plots-scores-var" })
-    quart = reactive({ input$"plots-scores-quart" })
+    ano   = reactive({ input$"geral-ano" })
+    var   = reactive({ input$"fa-scores-var" })
+    quart = reactive({ input$"fa-scores-quart" })
     df    = reactive({ dfs[[ano()]] })
 
-    output$"plots-scores-mapa" = plotly::renderPlotly({
-      req(df(), var(), quart())
+    output$"fa-scores-mapa" = plotly::renderPlotly({
+      req(df(), var())
       plot_map(df(), var = var(), quart = quart()) |>
         plotly::ggplotly()
     })
 
     observeEvent(df(), {
-      updateSelectInput(session, "plots-scores-var",
-        choices = colnames(df())
+      updateSelectInput(session, "fa-scores-var",
+        #choices = colnames(df())
+        choices = c("score médio eee", "score efetividade", "score eficácia", "score eficiência", "score médio su", "score sustentabilidade", "score universalidade")
       )
     })
 
-    output$"plots-scores-summary" = renderTable({
+    output$"fa-scores-summary" = renderTable({
       req(df(), var())
       smry = summary(df()[[var()]])
       smry |>
@@ -90,22 +116,35 @@ shiny = function() {
         as.data.frame()
     })
 
-    output$"plots-loadings-eee" = renderPlot({
+    output$"fa-loadings-eee" = renderPlot({
       req(df())
       FA_EEE = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "EEE"))
       plot_loading(FA_EEE)
     })
 
-    output$"plots-loadings-su" = renderPlot({
+    output$"fa-loadings-su" = renderPlot({
       req(df())
       FA_SU = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "SU"))
       plot_loading(FA_SU)
     })
   }
 
+
+  ####################
+  #####  shinyApp ####
+  ####################
   shinyApp(
-    ui = navbarPage(title = "SNIS app", PanelPlots),
+    ui = navbarPage(
+      title = "SNIS app",
+      header = tagList(
+        div(
+          style = "padding: 10px;",
+          selectInput("geral-ano", label = "Ano", choices = as.character(2010:2021))
+        )
+      ),
+      PanelTabela,
+      PanelFA
+    ),
     server = shiny_server
   )
-
 }

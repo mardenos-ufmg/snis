@@ -19,3 +19,11 @@ library(snis)
 ```
 
 Teste
+
+```{r}
+for (ano in 2010:2022) {
+  df = read(ano)
+  na_cols = names(df)[sapply(df, function(x) all(is.na(x)))]
+  if (length(na_cols))  cat(ano, "\t", na_cols, "\n")
+}
+```
