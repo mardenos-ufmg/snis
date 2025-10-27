@@ -23,7 +23,7 @@ plot_map = function(df, var, quart = F) {
   mapa =
     readRDS("data/map_MG.rds") |>
     dplyr::left_join(df, by = c("code_muni" = "código do município")) |>
-    sf::st_as_sf() #Juntar o código pelos municípios
+    sf::st_as_sf()
 
   ggplot(mapa) +
     geom_sf(aes(fill = .data[["var"]]), color = NA) +
@@ -126,7 +126,7 @@ table_ranking <- function(df, top_n = NULL) {
 #' @returns table
 #'
 #' @export
-table_top_bottom <- function(df, top_n = 10, bottom_n = 10) {
+table_top_bottom <- function(df, top_n, bottom_n) {
   df_aux <- df %>%
     dplyr::group_by(município, `natureza jurídica`) %>%
     dplyr::summarise(
@@ -177,13 +177,8 @@ table_top_bottom <- function(df, top_n = 10, bottom_n = 10) {
 #' @returns plot
 #'
 #' @export
-plot_boxplot <- function(df,
-                         score_col = "score médio eee",
-                         group_col = "tipo de serviço",
-                         titulo = NULL,
-                         cor_paleta = "Set2") {
+plot_boxplot <- function(df, score_col, group_col, titulo = NULL, cor_paleta = "Set2") {
 
-  # 1. Checagem das colunas
   if (!all(c(score_col, group_col) %in% colnames(df))) {
     stop("As colunas informadas não existem no dataframe.")
   }
@@ -240,12 +235,7 @@ plot_boxplot <- function(df,
 #' @returns plot
 #'
 #' @export
-plot_median_barplot <- function(df,
-                                score_col = "score médio eee",
-                                group_col = "natureza jurídica",
-                                titulo = NULL,
-                                casas_decimais = 3,
-                                cor_paleta = "Blues") {
+plot_median_barplot <- function(df, score_col, group_col, titulo = NULL, casas_decimais = 3, cor_paleta = "Blues") {
 
   if (!all(c(score_col, group_col) %in% colnames(df))) {
     stop("❌ As colunas informadas não existem no dataframe.")
@@ -376,7 +366,7 @@ plot_ridge_scores <- function(df, group_col, score_cols, titulo = NULL) {
 #' @returns plot
 #'
 #' @export
-table_median <- function(df, score_col = "score médio eee", group_col = "Nome_Mesorregião") {
+table_median <- function(df, score_col, group_col) {
 
   if (!all(c(score_col, group_col) %in% colnames(df))) {
     stop(paste0("❌ Algumas colunas informadas não existem no dataframe: ",
@@ -393,4 +383,82 @@ table_median <- function(df, score_col = "score médio eee", group_col = "Nome_M
     dplyr::arrange(Score_Mediana)
 
   return(df_resumo)
+}
+
+
+#Gera um mapa interativo do grupo desejado
+#' Title
+#'
+#' @param df .
+#' @param score_col .
+#' @param group_col .
+#' @param titulo .
+#'
+#' @returns tmap
+#'
+#' @export
+plot_interactive_map <- function(df, score_col, group_col, titulo = NULL) {
+
+  geojson_path <- "data/geojs-31-mun.json"
+
+  if (!requireNamespace("sf", quietly = TRUE) ||
+      !requireNamespace("tmap", quietly = TRUE)) {
+    stop("❌ Os pacotes 'sf' e 'tmap' são necessários para esta função.")
+  }
+
+
+  if (!all(c(score_col, "município", group_col) %in% colnames(df))) {
+    stop("❌ O dataframe não contém todas as colunas necessárias: ",
+         paste(c("município", score_col, group_col), collapse = ", "))
+  }
+
+  df_aux <- df %>%
+    dplyr::select(
+      name = dplyr::all_of("município"),
+      Score = dplyr::all_of(score_col),
+      Grupo = dplyr::all_of(group_col)
+    ) %>%
+    dplyr::mutate(
+      Score = round(Score, 4),
+      Quantil = dplyr::case_when(
+        Score <= 0.25 ~ "(0-25)%",
+        Score > 0.25 & Score <= 0.50 ~ "(25-50)%",
+        Score > 0.50 & Score <= 0.75 ~ "(50-75)%",
+        TRUE ~ "(75-100)%"
+      ),
+      Quantil = factor(Quantil,
+                       levels = c("(0-25)%", "(25-50)%", "(50-75)%", "(75-100)%"))
+    ) %>%
+    dplyr::distinct(name, .keep_all = TRUE)
+
+  geo_data_sf <- sf::st_read(geojson_path, quiet = TRUE)
+
+  geo_merged <- geo_data_sf %>%
+    dplyr::left_join(df_aux, by = "name")
+
+  if (is.null(titulo)) {
+    titulo <- paste0("Mapa Interativo de ", score_col)
+  }
+
+  cores_quantil <- c("#922B21", "#E67E22", "#F4D03F", "#52BE80")
+
+  tmap::tmap_mode("view")
+  mapa <- tmap::tm_shape(geo_merged) +
+    tmap::tm_fill(
+      col = "Quantil",
+      title = titulo,
+      palette = cores_quantil,
+      style = "cat",
+      popup.vars = c("name", "Grupo", "Quantil", "Score")
+    ) +
+    tmap::tm_borders(col = "gray50", lwd = 0.5) +
+    tmap::tm_basemap(server = "OpenStreetMap") +
+    tmap::tm_view(set.view = c(lon = -43.98, lat = -19.84, zoom = 6)) +
+    tmap::tm_layout(
+      main.title = titulo,
+      main.title.position = "center",
+      legend.outside = TRUE
+    )
+
+  return(mapa)
 }
