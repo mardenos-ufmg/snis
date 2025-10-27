@@ -33,11 +33,12 @@ shiny = function() {
     fluidRow(
       column(7,
         fluidRow(header_col("Mapa", "#a8f2fe", 8)),
-        plotOutput("tabela-mapa")
+        plotly::plotlyOutput("tabela-mapa")
       ),
       column(5,
         fluidRow(header_col("Resumo", "#a8f2fe", 8)),
-        plotOutput("tabela-resumo")
+        plotOutput("tabela-hist"),
+        tableOutput("tabela-smry")
       )
     )
   )
