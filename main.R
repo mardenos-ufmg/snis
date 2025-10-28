@@ -17,16 +17,18 @@ plot_map(df_, "score médio eee", T)
 plot_loading(FA_EEE)
 plot_loading(FA_SU)
 
-dfs = list()
-for (ano in 2010:2021) {
-  set.seed(12345)
+
+
+
+dados = list()
+for (ano in 2010:2022) {
   cat("\nProcessando ano", ano, "... ")
   df = tryCatch(
     {
       x = process_data(ano)
       FA_EEE = fa(x)
-      FA_SU  = fa(x, features = readODS::read_ods("data/features.ods", sheet = "SU"))
-      dfs[[as.character(ano)]] = update_df_fa(x, FA_EEE, FA_SU)
+      FA_SU  = fa(x, grupos = readODS::read_ods("data/grupos.ods", sheet = "SU"))
+      update_df_fa(x, FA_EEE, FA_SU)
     },
     error = function(e) {
       cat("falhou:", conditionMessage(e))
@@ -34,8 +36,26 @@ for (ano in 2010:2021) {
     }
   )
   if (is.null(df)) next
+
+  FA_EEE =
+  FA_SU  =
+
+  dados[[as.character(ano)]]$df     = df
+  dados[[as.character(ano)]]$fa$eee = fa(df)
+  dados[[as.character(ano)]]$fa$su  = fa(df, grupos = readODS::read_ods("data/grupos.ods", sheet = "SU"))
+  dados[[as.character(ano)]]$grupos$eee = readODS::read_ods("data/grupos.ods", sheet = "EEE")
+  dados[[as.character(ano)]]$grupos$su  = readODS::read_ods("data/grupos.ods", sheet = "SU")
 }
-saveRDS(dfs, "data/dfs.rds")
+saveRDS(dados, "data/dados.rds")
+
+dados = readRDS("data/dados.rds")
+for (ano in 2010:2022) {
+  df = dados[[as.character(ano)]]$df
+  df = read(ano)
+  col_na = colnames(df)[sapply(df, function(x) all(is.na(x)))]
+  if (length(col_na)) cat("\n", ano, "\t", col_na)
+}
+
 
 # Processando ano 2011 ...
 # Processando ano 2012 ... falhou: missing value where TRUE/FALSE needed
@@ -49,8 +69,36 @@ saveRDS(dfs, "data/dfs.rds")
 # Processando ano 2020 ...
 # Processando ano 2021 ...
 
-# set.seed(123)
-# input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
-#
-# set.seed(123)
-# input2 = mice::mice(df[,numerico2],  m = 5, method = "cart", printFlag = FALSE) |> complete() |> as_tibble() |> suppressWarnings()
+codigos =
+  file("data/Desagregado-2021.csv", encoding = "UTF-16LE") |>
+  readLines(1) |>
+  strsplit(";") |>
+  purrr::pluck(1) |>
+  {\(.) gsub("\"", "", .)}() |>
+  {\(.) gsub("\\\\", "", .)}() |>
+  tibble::tibble() |>
+  `colnames<-`("texto") |>
+  tidyr::separate(texto, into = c("código", "descrição"), sep = " - ", extra = "merge", fill = "left") |>
+  {\(.)
+    {.[1:10,1] = tolower(purrr::pluck(.[1:10,2], 1)); .}
+    }() |>
+  rbind(
+    data.frame(
+      código    = c("código da região intermediária", "região intermediária", "código da região imediata", "região imediata"),
+      descrição = c("Região Geográfica Intermediária", "Nome Região Geográfica Intermediária", "Região Geográfica Imediata", "Nome Região Geográfica Imediata")
+    )
+  ) |>
+  rbind(
+    data.frame(
+      código    = c("prestador2", "tarifa", "micromedida", "urbanização"),
+      descrição = c("prestador2", "tarifa", "micromedida", "urbanização")
+    )
+  ) |>
+  {\(.){
+    x = read(2021)
+    mutate(., tipo = sapply( código, \(cod) class(x[[cod]])[1] ))
+  }}()
+
+codigos |>
+  filter( código %in% colnames(dados[["2021"]]$df) )
+

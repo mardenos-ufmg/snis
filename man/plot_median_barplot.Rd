@@ -6,8 +6,8 @@
 \usage{
 plot_median_barplot(
   df,
-  score_col = "score médio eee",
-  group_col = "natureza jurídica",
+  score_col,
+  group_col,
   titulo = NULL,
   casas_decimais = 3,
   cor_paleta = "Blues"

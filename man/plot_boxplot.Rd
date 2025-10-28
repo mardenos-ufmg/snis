@@ -4,13 +4,7 @@
 \alias{plot_boxplot}
 \title{Title}
 \usage{
-plot_boxplot(
-  df,
-  score_col = "score médio eee",
-  group_col = "tipo de serviço",
-  titulo = NULL,
-  cor_paleta = "Set2"
-)
+plot_boxplot(df, score_col, group_col, titulo = NULL, cor_paleta = "Set2")
 }
 \arguments{
 \item{df}{.}

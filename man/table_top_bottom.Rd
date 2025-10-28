@@ -4,7 +4,7 @@
 \alias{table_top_bottom}
 \title{Title}
 \usage{
-table_top_bottom(df, top_n = 10, bottom_n = 10)
+table_top_bottom(df, top_n, bottom_n)
 }
 \arguments{
 \item{df}{.}

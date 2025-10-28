@@ -17,7 +17,7 @@ shiny = function() {
     )
   }
 
-  dfs = readRDS("data/dfs.rds")
+  dados = readRDS("data/dados.rds")
 
   ##########################
   #####  Panel Tabela  #####
@@ -27,7 +27,7 @@ shiny = function() {
 
     fluidRow(header_col("Dados", "#87C2CC", 12)),
     fluidRow(
-      tableOutput("tabela-tabela")
+      DT::dataTableOutput("tabela-tabela")
     ),
 
     fluidRow(
@@ -47,7 +47,7 @@ shiny = function() {
   #####  Panel FA  #####
   ######################
   PanelFA = tabPanel(
-    title = "Plots",
+    title = "Análise Fatorial",
 
     fluidRow(header_col("Scores", "#a8f2fe", 8)),
 
@@ -90,11 +90,13 @@ shiny = function() {
   ####################
   shiny_server = function(input, output, session) {
 
+    ###  Reactive  ###
     ano   = reactive({ input$"geral-ano" })
     var   = reactive({ input$"fa-scores-var" })
     quart = reactive({ input$"fa-scores-quart" })
-    df    = reactive({ dfs[[ano()]] })
+    df    = reactive({ dados[[ano()]]$df })
 
+    ###  PanelFA  ###
     output$"fa-scores-mapa" = plotly::renderPlotly({
       req(df(), var())
       plot_map(df(), var = var(), quart = quart()) |>
@@ -110,25 +112,69 @@ shiny = function() {
 
     output$"fa-scores-summary" = renderTable({
       req(df(), var())
-      smry = summary(df()[[var()]])
-      smry |>
+      df()[[var()]] |>
+        summary() |>
         as.matrix() |>
         t() |>
         as.data.frame()
     })
 
     output$"fa-loadings-eee" = renderPlot({
-      req(df())
-      FA_EEE = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "EEE"))
-      plot_loading(FA_EEE)
+      req(ano())
+      #FA_EEE = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "EEE"))
+      plot_loading(dados[[ano()]]$fa$eee)
     })
 
     output$"fa-loadings-su" = renderPlot({
-      req(df())
-      FA_SU = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "SU"))
-      plot_loading(FA_SU)
+      req(ano())
+      #FA_SU = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "SU"))
+      plot_loading(dados[[ano()]]$fa$su)
     })
+
+    ###  PanelTabela  ###
+    output$"tabela-tabela" = DT::renderDataTable({
+      DT::datatable(df(),
+                    selection = list(mode = "single", target = "column"),
+                    options = list(scrollX = TRUE),
+                    rownames = FALSE
+                    )
+    })
+
+    coluna_selecionada = reactive({
+      req(input$"tabela-tabela_columns_selected")
+      colnames(df())[input$"tabela-tabela_columns_selected" + 1]
+    })
+
+    output$"tabela-hist" = renderPlot({
+      x = df()[[coluna_selecionada()]]
+
+      if (is.numeric(x)) {
+        hist(x,
+             main = paste("Histograma de", coluna_selecionada()),
+             xlab = coluna_selecionada(),
+             col = "skyblue", border = "white")
+      } else {
+        barplot(table(x),
+                main = paste("Frequência de", coluna_selecionada()),
+                col = "orange", border = "white")
+      }
+    })
+
+    output$"tabela-smry" = renderTable({
+      df()[[coluna_selecionada()]] |>
+        summary() |>
+        as.matrix() |>
+        t() |>
+        as.data.frame()
+    })
+
+    output$"tabela-mapa" = plotly::renderPlotly({
+      plot_map(df(), coluna_selecionada(), F) |>
+        plotly::ggplotly()
+    })
+
   }
+
 
 
   ####################

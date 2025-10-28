@@ -11,7 +11,8 @@ read = function(ano) {
   stopifnot("Ano deve estar entre 2015 e 2022" = ano %in% 2010:2022)
 
   ibge =
-    readODS::read_ods("data/RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", skip = 6) |>
+    system.file("extdata", "RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", package = "snis") |>
+    readODS::read_ods(skip = 6) |>
     select(c("Código Município Completo",
                     "Região Geográfica Intermediária",
                     "Nome Região Geográfica Intermediária",
@@ -30,7 +31,9 @@ read = function(ano) {
     suppressMessages()
 
   colnames =
-    paste0("data/Desagregado-", ano, ".csv") |>
+    system.file("extdata",
+                paste0("Desagregado-", ano, ".csv"),
+                package = "snis") |>
     #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines(1) |>
@@ -41,7 +44,10 @@ read = function(ano) {
     {\(.) sub(" - .*", "", .) }()
 
   df =
-    paste0("data/Desagregado-", ano, ".csv") |>
+    system.file("extdata",
+                paste0("Desagregado-", ano, ".csv"),
+                package = "snis") |>
+    #paste0("data/Desagregado-", ano, ".csv") |>
     #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines() |>
