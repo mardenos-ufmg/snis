@@ -21,13 +21,13 @@ plot_map = function(df, var, quart = F) {
   }
 
   mapa =
-    readRDS("data/map_MG.rds") |>
+    mapa_MG |>
     dplyr::left_join(df, by = c("code_muni" = "código do município")) |>
     sf::st_as_sf()
 
   ggplot(mapa) +
     geom_sf(aes(fill = .data[["var"]]), color = NA) +
-    {if (quart) {
+    {if ( quart | is.factor(df$var) ) {
       scale_fill_viridis_d(option = "plasma", na.value = "grey90")
     } else {
       scale_fill_viridis_c(option = "plasma", na.value = "grey90")

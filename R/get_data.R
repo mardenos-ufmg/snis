@@ -165,11 +165,13 @@ process_data = function(ano) {
           .data$`natureza jurídica` == "Autarquia" ~ "Autarquia",
           .data$`natureza jurídica` == "Administração pública direta" ~ "Prefeitura",
           .data$`natureza jurídica` == "Empresa privada" ~ "Empresa privada"
-        )
+        ),
+      prestador2 = factor(prestador2)
     )
 
   municipios_duplicados =
-    readODS::read_ods("data/duplicatas.ods") |>
+    system.file("extdata", "duplicatas.ods", package = "snis") |>
+    readODS::read_ods() |>
     mutate(
       id = paste(.data$município, "+", .data$prestador2)
     )

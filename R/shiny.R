@@ -17,12 +17,12 @@ shiny = function() {
     )
   }
 
-  dados = readRDS("data/dados.rds")
+  dados = dados
 
-  ##########################
-  #####  Panel Tabela  #####
-  ##########################
-  PanelTabela = tabPanel(
+  ###########################
+  #####  Painel Tabela  #####
+  ###########################
+  PainelTabela = tabPanel(
     title = "Tabela",
 
     fluidRow(header_col("Dados", "#87C2CC", 12)),
@@ -43,10 +43,10 @@ shiny = function() {
     )
   )
 
-  ######################
-  #####  Panel FA  #####
-  ######################
-  PanelFA = tabPanel(
+  #######################
+  #####  Painel FA  #####
+  #######################
+  PainelFA = tabPanel(
     title = "Análise Fatorial",
 
     fluidRow(header_col("Scores", "#a8f2fe", 8)),
@@ -85,6 +85,19 @@ shiny = function() {
     )
   )
 
+  ########################
+  #####  Inferência  #####
+  ########################
+  PainelInferencia <- tabPanel("Inferência", h3("Inferência"))
+
+
+  #############################
+  #####  Painel Comparar  #####
+  #############################
+  PainelComparar <- tabPanel("Comparar", h3("Painel Comparar (sem seletor de ano)"))
+
+
+
   ####################
   #####  Server  #####
   ####################
@@ -92,14 +105,14 @@ shiny = function() {
 
     ###  Reactive  ###
     ano   = reactive({ input$"geral-ano" })
-    var   = reactive({ input$"fa-scores-var" })
-    quart = reactive({ input$"fa-scores-quart" })
+    #var   = reactive({ input$"fa-scores-var" })
+    #quart = reactive({ input$"fa-scores-quart" })
     df    = reactive({ dados[[ano()]]$df })
 
-    ###  PanelFA  ###
+    ###  PainelFA  ###
     output$"fa-scores-mapa" = plotly::renderPlotly({
-      req(df(), var())
-      plot_map(df(), var = var(), quart = quart()) |>
+      req(df())
+      plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
         plotly::ggplotly()
     })
 
@@ -111,8 +124,8 @@ shiny = function() {
     })
 
     output$"fa-scores-summary" = renderTable({
-      req(df(), var())
-      df()[[var()]] |>
+      req(df())
+      df()[[ input$"fa-scores-var" ]] |>
         summary() |>
         as.matrix() |>
         t() |>
@@ -131,7 +144,7 @@ shiny = function() {
       plot_loading(dados[[ano()]]$fa$su)
     })
 
-    ###  PanelTabela  ###
+    ###  PainelTabela  ###
     output$"tabela-tabela" = DT::renderDataTable({
       DT::datatable(df(),
                     selection = list(mode = "single", target = "column"),
@@ -180,18 +193,33 @@ shiny = function() {
   ####################
   #####  shinyApp ####
   ####################
-  shinyApp(
-    ui = navbarPage(
-      title = "SNIS app",
-      header = tagList(
-        div(
-          style = "padding: 10px;",
-          selectInput("geral-ano", label = "Ano", choices = as.character(2010:2021))
-        )
-      ),
-      PanelTabela,
-      PanelFA
+  ui = navbarPage(
+    title = "SNIS app",
+
+    header = tagList(
+      tags$script(HTML("
+        $(document).on('shown.bs.tab', 'a[data-bs-toggle=\"tab\"]', function (e) {
+          var tabName = $(e.target).text().trim();
+          if (tabName === 'Comparar') {
+            $('#geral-ano-div').hide();
+          } else {
+            $('#geral-ano-div').show();
+          }
+        });
+      ")),
+
+      div(
+        id = "geral-ano-div",
+        style = "padding: 10px;",
+        selectInput("geral-ano", label = "Ano", choices = as.character(2010:2021))
+      )
     ),
-    server = shiny_server
+
+    PainelTabela,
+    PainelFA,
+    PainelInferencia,
+    PainelComparar
   )
+
+  shinyApp(ui = ui, server = shiny_server)
 }

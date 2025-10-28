@@ -1,0 +1,63 @@
+---
+title: "dados"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dados}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(snis)
+library(knitr)
+
+codigos =
+  system.file("extdata", "Desagregado-2021.csv", package = "snis") |>
+  file(encoding = "UTF-16LE") |>
+  readLines(1) |>
+  strsplit(";") |>
+  purrr::pluck(1) |>
+  {\(.) gsub("\"", "", .)}() |>
+  {\(.) gsub("\\\\", "", .)}() |>
+  tibble::tibble() |>
+  `colnames<-`("texto") |>
+  tidyr::separate(texto, into = c("código", "descrição"), sep = " - ", extra = "merge", fill = "left") |>
+  {\(.)
+    {.[1:10,1] = tolower(purrr::pluck(.[1:10,2], 1)); .}
+    }() |>
+  rbind(
+    data.frame(
+      código    = c("código da região intermediária", "região intermediária", "código da região imediata", "região imediata"),
+      descrição = c("Região Geográfica Intermediária", "Nome Região Geográfica Intermediária", "Região Geográfica Imediata", "Nome Região Geográfica Imediata")
+    )
+  ) |>
+  rbind(
+    data.frame(
+      código    = c("prestador2", "tarifa", "micromedida", "urbanização"),
+      descrição = c("prestador2", "tarifa", "micromedida", "urbanização")
+    )
+  ) |>
+  {\(.){
+    x = read(2021)
+    mutate(., tipo = sapply( código, \(cod) class(x[[cod]])[1] ))
+  }}()
+
+codigos2 =
+  codigos |>
+  filter( código %in% colnames(dados[["2021"]]$df) )
+```
+
+```{r}
+kable(codigos2, caption = "Tabela com dados filtrados")
+```
+
+```{r}
+kable(codigos, caption = "Tabela com dados filtrados")
+```

@@ -26,10 +26,15 @@ Imports:
     ggridges,
     sf,
     geobr,
-    tmap
+    tmap,
+    DT,
+    ggridges,
+    RColorBrewer,
+    viridis
 Suggests:
     knitr,
     rmarkdown,
     testthat
 VignetteBuilder: knitr
 URL: https://mardenos-ufmg.github.io/snis/
+LazyData: true
