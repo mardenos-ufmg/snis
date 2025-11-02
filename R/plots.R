@@ -73,23 +73,30 @@ plot_loading = function(FA) {
   gridExtra::grid.arrange(grobs = plot_list, ncol = length(grupos))
 }
 
-#' Title
+#' Gera uma Tabela de Ranking dos Municípios com base nos Scores
 #'
-#' @param df .
-#' @param top_n .
 #'
-#' @returns df
+#' @param df Data frame contendo o nome dos municípios, o código dos municípios e os scores numéricos desejados, incluindo o score médio das variáveis.
+#'
+#' @param top_n (opcional) Número de municípios a serem exibidos no ranking final.
+#'   Se não for especificado, retorna 10 municípios.
+#'
+#' @return Um data frame contendo as colunas:
+#'   - `município`: nome do município
+#'   - `Ranking`: posição no ranking baseado no Score Médio
+#'   - `Rank_Medio`: ranking médio de todas as dimensões
+#'   - `Diferenca`: diferença entre o Ranking e o Rank_Medio
+#'   - `Sustentabilidade`, `Universalidade`, `Score_Medio`: valores médios dos scores
 #'
 #' @export
-table_ranking <- function(df, top_n = NULL) {
+table_ranking <- function(df, top_n = 10) {
 
   df_score <- df %>%
     dplyr::group_by(município, `código do município`) %>%
     dplyr::summarise(
-      Efetividade = mean(`score efetividade`, na.rm = TRUE),
-      Eficácia = mean(`score eficácia`, na.rm = TRUE),
-      Eficiência = mean(`score eficiência`, na.rm = TRUE),
-      Score_Medio = mean(`score médio eee`, na.rm = TRUE),
+      Sustentabilidade = mean(`score sustentabilidade`, na.rm = TRUE),
+      Universalidade = mean(`score universalidade`, na.rm = TRUE),
+      Score_Medio = mean(`score médio su`, na.rm = TRUE),
       .groups = "drop"
     )
 
@@ -98,7 +105,7 @@ table_ranking <- function(df, top_n = NULL) {
     dplyr::mutate(Ranking = dplyr::row_number())
 
   df_score <- df_score %>%
-    dplyr::arrange(desc(Efetividade + Eficácia + Eficiência)) %>%
+    dplyr::arrange(desc(Sustentabilidade + Universalidade)) %>%
     dplyr::mutate(Rank_Medio = dplyr::row_number()) %>%
     dplyr::arrange(Ranking)
 
@@ -107,7 +114,7 @@ table_ranking <- function(df, top_n = NULL) {
 
   df_score <- df_score %>%
     dplyr::select(município, Ranking, Rank_Medio, Diferenca,
-                  Efetividade, Eficácia, Eficiência, Score_Medio)
+                  Sustentabilidade, Universalidade, Score_Medio)
 
   if (!is.null(top_n)) {
     df_score <- head(df_score, top_n)
@@ -116,30 +123,29 @@ table_ranking <- function(df, top_n = NULL) {
   return(df_score)
 }
 
-#Imprime as melhores e piores cidades com base no ranking
-#' Title
+#' . Exibe as Melhores e Piores Cidades com base no Score Médio
 #'
-#' @param df .
-#' @param top_n .
-#' @param bottom_n .
+#' @param df . Data frame contendo o nome dos municípios, a natureza jurídica e os scores numéricos desejados, incluindo o score médio das variáveis.
 #'
-#' @returns table
+#' @param top_n . Número de municípios com maiores *scores médios* a serem listados.
+#' @param bottom_n. Número de municípios com menores *scores médios* a serem listados.
 #'
-#' @export
+#' @return . Uma lista com dois elementos:
+#'   - `Melhores`: data frame com os municípios com maiores *scores médios*
+#'   - `Piores`: data frame com os municípios com menores *scores médios*
+#'
 table_top_bottom <- function(df, top_n, bottom_n) {
   df_aux <- df %>%
     dplyr::group_by(município, `natureza jurídica`) %>%
     dplyr::summarise(
-      Efetividade = mean(`score efetividade`, na.rm = TRUE),
-      Eficácia = mean(`score eficácia`, na.rm = TRUE),
-      Eficiência = mean(`score eficiência`, na.rm = TRUE),
-      Score_Medio = mean(`score médio eee`, na.rm = TRUE),
+      Sustentabilidade = mean(`score sustentabilidade`, na.rm = TRUE),
+      Universalidade = mean(`score universalidade`, na.rm = TRUE),
+      Score_Medio = mean(`score médio su`, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     dplyr::mutate(
-      Efetividade = round(Efetividade, 3),
-      Eficácia = round(Eficácia, 3),
-      Eficiência = round(Eficiência, 3),
+      Sustentabilidade = round(Sustentabilidade, 3),
+      Universalidade = round(Universalidade, 3),
       Score_Medio = round(Score_Medio, 3)
     )
 
@@ -165,16 +171,37 @@ table_top_bottom <- function(df, top_n, bottom_n) {
   )
 }
 
-#Imprime boxplot para a variavel selecionada
-#' Title
+#' Cria um Boxplot para Visualizar a Distribuição de um Score por Grupo
 #'
-#' @param df .
-#' @param score_col .
-#' @param group_col .
-#' @param titulo .
-#' @param cor_paleta .
+#' Essa função gera um boxplot que mostra a distribuição de uma variável de
+#' *score* (por exemplo, um indicador de desempenho) em diferentes grupos
+#' (como prestadores, regiões ou naturezas jurídicas).
 #'
-#' @returns plot
+#' @param df Data frame contendo as variáveis que serão utilizadas no gráfico.
+#'
+#' @param score_col Nome (string) da coluna que contém o score ou variável numérica
+#'   que será representada no eixo *y*.
+#'
+#' @param group_col Nome (string) da coluna categórica que define os grupos
+#'   para o eixo *x*.
+#'
+#' @param titulo (opcional) Título do gráfico.
+#'   Se não for informado, é gerado automaticamente com base nos nomes das colunas.
+#'
+#' @param cor_paleta (opcional) Nome da paleta de cores a ser usada
+#'   (por padrão `"Set2"` do pacote **RColorBrewer**).
+#'   Se o número de categorias for maior que 8, usa automaticamente a paleta **viridis**.
+#'
+#' @return Um objeto `ggplot` contendo o boxplot formatado.
+#'
+#' @examples
+#' df <- dfs[["2010"]]
+#' plot_boxplot(
+#'   df,
+#'   score_col = "score médio eee",
+#'   group_col = "prestador2",
+#'   titulo = "Distribuição do Score Médio EEE por Tipo de Serviço"
+#' )
 #'
 #' @export
 plot_boxplot <- function(df, score_col, group_col, titulo = NULL, cor_paleta = "Set2") {
