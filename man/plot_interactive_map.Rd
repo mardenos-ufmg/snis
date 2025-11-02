@@ -2,22 +2,26 @@
 % Please edit documentation in R/plots.R
 \name{plot_interactive_map}
 \alias{plot_interactive_map}
-\title{Title}
+\title{Mapa interativo de Scores por Região}
 \usage{
-plot_interactive_map(df, score_col, group_col, titulo = NULL)
+plot_interactive_map(df, score_col, group_col, titulo = NULL, quart = FALSE)
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{score_col}{.}
+\item{score_col}{String com o nome da coluna que contém o score, como \code{"score médio su"}.}
 
-\item{group_col}{.}
+\item{group_col}{String com o nome da coluna categórica que define a região, como \code{"região intermediária"}.}
 
-\item{titulo}{.}
+\item{titulo}{(opcional) Título do mapa. Se \code{NULL}, é gerado automaticamente com base no nome da coluna de score.}
+
+\item{quart}{(opcional) Lógico. Se \code{TRUE}, colore os municípios por \strong{quartis} do score;
+se \code{FALSE} (padrão), usa os valores contínuos.}
 }
 \value{
-tmap
+Um objeto \code{tmap} interativo com os municípios coloridos por quartis do score.
 }
 \description{
-Title
+Gera um mapa interativo mostrando a distribuição de um score por região,
+colorindo os municípios de acordo com quartis do score.
 }

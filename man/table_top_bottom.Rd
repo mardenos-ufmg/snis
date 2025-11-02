@@ -2,20 +2,24 @@
 % Please edit documentation in R/plots.R
 \name{table_top_bottom}
 \alias{table_top_bottom}
-\title{Title}
+\title{Tabela dos Melhores e Piores municípios}
 \usage{
 table_top_bottom(df, top_n, bottom_n)
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{top_n}{.}
+\item{top_n}{Número de municípios com maiores \emph{scores médios} a serem listados.}
 
-\item{bottom_n}{.}
+\item{bottom_n}{Número de municípios com menores \emph{scores médios} a serem listados.}
 }
 \value{
-table
+Uma lista com dois elementos:
+\itemize{
+\item \code{Melhores}: data frame com os municípios com maiores \emph{scores médios};
+\item \code{Piores}: data frame com os municípios com menores \emph{scores médios}.
+}
 }
 \description{
-Title
+Exibe uma tabela cos os Melhores e Piores Municípios com base no Score Médio das categorias.
 }

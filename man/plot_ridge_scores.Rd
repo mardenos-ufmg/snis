@@ -2,22 +2,33 @@
 % Please edit documentation in R/plots.R
 \name{plot_ridge_scores}
 \alias{plot_ridge_scores}
-\title{Title}
+\title{Gráfico tipo "ondas" (ridge) para múltiplos scores}
 \usage{
-plot_ridge_scores(df, group_col, score_cols, titulo = NULL)
+plot_ridge_scores(
+  df,
+  score_cols,
+  group_cols,
+  titulo = NULL,
+  cor_paleta = "plasma"
+)
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{group_col}{.}
+\item{score_cols}{Vetor de strings com os nomes das colunas que contêm os scores, como \verb{score médio su}, \verb{score médio eee}.}
 
-\item{score_cols}{.}
+\item{group_cols}{Vetor de strings com os nomes das colunas de agrupamento, como \verb{região intermediária} e \verb{natureza jurídica}.}
 
-\item{titulo}{.}
+\item{titulo}{(opcional) Título do gráfico. Se \code{NULL}, é gerado automaticamente}
+
+\item{cor_paleta}{(opcional) Paleta de cores viridis a ser usada.
+Opções: \code{"viridis"}, \code{"plasma"}, \code{"magma"}, \code{"cividis"}, \code{"inferno"}.
+Padrão: \code{"plasma"}.}
 }
 \value{
-plot
+Um objeto \code{ggplot} com o ridge plot.
 }
 \description{
-Title
+Cria um gráfico de densidade estilo "ridge plot", mostrando a distribuição
+de diferentes scores (\code{score_cols}) por grupos (\code{group_col}).
 }

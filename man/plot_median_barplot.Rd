@@ -2,33 +2,34 @@
 % Please edit documentation in R/plots.R
 \name{plot_median_barplot}
 \alias{plot_median_barplot}
-\title{Title}
+\title{Gráfico de barras com a Mediana por Grupo}
 \usage{
 plot_median_barplot(
   df,
-  score_col,
-  group_col,
+  score_cols,
+  group_cols,
   titulo = NULL,
-  casas_decimais = 3,
-  cor_paleta = "Blues"
+  cor_paleta = "plasma"
 )
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{score_col}{.}
+\item{score_cols}{Vetor de strings com os nomes das colunas que contêm os scores, como \verb{score médio su}, \verb{score médio eee}.}
 
-\item{group_col}{.}
+\item{group_cols}{Vetor de strings com os nomes das colunas de agrupamento, como \verb{região intermediária}.}
 
-\item{titulo}{.}
+\item{titulo}{(opcional) Título do gráfico. Se \code{NULL}, é gerado automaticamente}
 
-\item{casas_decimais}{.}
-
-\item{cor_paleta}{.}
+\item{cor_paleta}{(opcional) Paleta de cores viridis a ser usada.
+Opções: \code{"viridis"}, \code{"plasma"}, \code{"magma"}, \code{"cividis"}, \code{"inferno"}.
+Padrão: \code{"plasma"}.}
 }
 \value{
-plot
+Um objeto \code{ggplot} contendo o barplot formatado.
 }
 \description{
-Title
+Essa função cria um barplot horizontal mostrando a mediana de uma variável
+numérica (\code{score_col}) por grupos (\code{group_col}), adicionando os valores das
+medianas sobre as barras.
 }

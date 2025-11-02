@@ -2,16 +2,35 @@
 % Please edit documentation in R/plots.R
 \name{plot_loading}
 \alias{plot_loading}
-\title{Title}
+\title{Heatmap das Cargas Fatoriais por Grupo}
 \usage{
 plot_loading(FA)
 }
 \arguments{
-\item{FA}{.}
+\item{FA}{Objeto de análise fatorial criado previamente, que deve conter:
+\itemize{
+\item \code{FA$geral$scores}: tabela com scores gerais (usada para identificar os grupos);
+\item \code{FA[[grupo]]$loadings$df}: data frame com as cargas fatoriais de cada variável por fator.
+}}
 }
 \value{
-ggplot
+Um gráfico \code{ggplot} combinado (grid) de todos os grupos, mostrando:
+\itemize{
+\item Variáveis no eixo y;
+\item Fatores no eixo x;
+\item Cargas fatoriais codificadas por cores (azul = negativa, vermelho = positiva, branco = zero);
+\item Valores numéricos das cargas sobre os tiles.
+}
 }
 \description{
-Title
+Essa função gera um conjunto de heatmaps mostrando as cargas fatoriais (\code{loadings})
+de cada variável em cada fator para diferentes grupos em uma análise fatorial.
+Cada grupo recebe um plot separado, e todos são combinados em um único grid.
+}
+\details{
+\itemize{
+\item Cada grupo é representado separadamente, com seu próprio título;
+\item As cores são escaladas individualmente para cada grupo, respeitando os valores mínimos e máximos das cargas;
+\item Os plots são organizados em um grid com número de colunas igual ao número de grupos.
+}
 }

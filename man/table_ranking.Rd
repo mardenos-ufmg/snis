@@ -2,18 +2,26 @@
 % Please edit documentation in R/plots.R
 \name{table_ranking}
 \alias{table_ranking}
-\title{Title}
+\title{Tabela dos Rankings}
 \usage{
-table_ranking(df, top_n = NULL)
+table_ranking(df, top_n = 10)
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{top_n}{.}
+\item{top_n}{(opcional) Número de municípios a serem exibidos no ranking final.
+Se não for especificado, retorna 10 municípios.}
 }
 \value{
-df
+Um data frame contendo as colunas:
+\itemize{
+\item \code{município}: nome do município;
+\item \code{Ranking}: posição no ranking baseado no Score Médio;
+\item \code{Rank_Medio}: ranking médio de todas as dimensões;
+\item \code{Diferenca}: diferença entre o Ranking e o Rank_Medio;
+\item \code{Sustentabilidade}, \code{Universalidade}, \code{Score_Medio}: valores médios dos scores;
+}
 }
 \description{
-Title
+Gera uma Tabela com o Ranking dos Municípios com base no Score Médio das categorias desejadas.
 }

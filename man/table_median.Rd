@@ -2,20 +2,24 @@
 % Please edit documentation in R/plots.R
 \name{table_median}
 \alias{table_median}
-\title{Title}
+\title{Tabela de Medianas por Grupo}
 \usage{
-table_median(df, score_col, group_col)
+table_median(df, score_cols, group_cols)
 }
 \arguments{
-\item{df}{.}
+\item{df}{Data frame contendo os dados.}
 
-\item{score_col}{.}
+\item{score_cols}{Vetor de strings com os nomes das colunas que contêm os scores, como \verb{score médio su}e \verb{score médio eee}.}
 
-\item{group_col}{.}
+\item{group_cols}{Vetor de strings com os nomes das colunas de agrupamento, como \verb{região intermediária}.}
 }
 \value{
-plot
+Data frame com duas colunas:
+\itemize{
+\item \code{group_col}: grupos;
+\item \code{Score_Mediana}: mediana do score em cada grupo.
+}
 }
 \description{
-Title
+Calcula a mediana de uma ou mais colunas de score por uma ou mais colunas de agrupamento.
 }
