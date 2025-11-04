@@ -1,0 +1,41 @@
+---
+title: "analise-furnas"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{analise-furnas}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(snis)
+
+alago = 
+  system.file("alago", "MUNICIPIOS DE ESTUDO.xlsx", package = "snis") |>
+  readxl::read_xlsx()
+
+dados2021 =
+  dados$"2021"$df |>
+  filter(`código do município` %in% alago$Codmun)
+  
+dados2016 =
+  dados$"2016"$df |>
+  filter(`código do município` %in% alago$Codmun)
+
+plot_map(dados2021, "score médio su")
+```
+
+
+
+
+```{r}
+plot_map(dados2016, "score médio su")
+
+```

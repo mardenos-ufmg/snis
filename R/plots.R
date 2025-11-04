@@ -399,8 +399,6 @@ table_median <- function(df, score_cols, group_cols) {
 #' @export
 plot_interactive_map <- function(df, score_col, group_col, titulo = NULL, quart = FALSE) {
 
-  geojson_path <- "data/geojs-31-mun.json"
-
   if (!requireNamespace("sf", quietly = TRUE) ||
       !requireNamespace("tmap", quietly = TRUE)) {
     stop("❌ Os pacotes 'sf' e 'tmap' são necessários para esta função.")
@@ -421,8 +419,8 @@ plot_interactive_map <- function(df, score_col, group_col, titulo = NULL, quart 
     dplyr::mutate(Score = round(Score, 4)) %>%
     dplyr::distinct(name, .keep_all = TRUE)
 
-  geo_data_sf <- sf::st_read(geojson_path, quiet = TRUE)
-  geo_merged <- geo_data_sf %>%
+  geo_merged <-
+    geo_data_sf %>%
     dplyr::left_join(df_aux, by = "name")
 
   if (is.null(titulo)) {
