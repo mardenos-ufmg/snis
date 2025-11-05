@@ -9,7 +9,7 @@ Bartlett <- function(df, alpha = 0.05) {
       n = nrow(df)
       ) |>
     {\(.) .$p.value}()
-  
+
   if (p.value > alpha) {
     return(FALSE)
   } else {
@@ -20,18 +20,27 @@ Bartlett <- function(df, alpha = 0.05) {
 
 update_df_fa = function(df, ...) {
   FAs = list(...)
-  df_score = FAs[[1]]$geral$scores["código do município"]
-  
+  #df_score = FAs[[1]]$geral$scores["código do município"]
+
   for (i in 1:length(FAs)) {
-    df_score_aux = FAs[[i]]$geral$scores
-    sufixo = colnames(df_score_aux)[-(1:2)] |> substr(1,1) |> paste0(collapse = "")
-    colnames(df_score_aux)[2] = paste(colnames(df_score_aux)[2], sufixo)
-    colnames(df_score_aux)[-1] = paste("score", colnames(df_score_aux)[-1])
-    
-    df_score = dplyr::left_join(df_score, df_score_aux, by = "código do município")
+    df_score_aux =
+      FAs[[i]]$geral$scores |>
+      select(-`código do município`)
+    colnames = colnames(df_score_aux)
+    sufixo = colnames(df_score_aux)[-1] |> substr(1,1) |> paste0(collapse = "")
+    colnames[1] = paste(colnames[1], sufixo)
+    colnames = paste("score", colnames)
+    df_score_aux =
+      df_score_aux |>
+      `colnames<-`( colnames )
+    df = cbind(df, df_score_aux)
+    # colnames(df_score_aux)[-1] = paste("score", colnames(df_score_aux)[-1])
+    # colnames(df_score_aux)[-1] = paste("score", colnames(df_score_aux)[-1])
+    # df_score = dplyr::left_join(df_score, df_score_aux, by = "código do município")
   }
-  
-  dplyr::left_join(df, df_score, by = "código do município")
+
+  # dplyr::left_join(df, df_score, by = "código do município")
+  as_tibble(df)
 }
 
 

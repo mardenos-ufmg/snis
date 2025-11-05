@@ -10,8 +10,7 @@ fa = function(
   if (is.null(grupos)) {
     grupos =
       system.file("extdata", "grupos.ods", package = "snis") |>
-      readODS::read_ods()
-
+      readODS::read_ods(sheet = "EEE")
   }
 
   grupos =
