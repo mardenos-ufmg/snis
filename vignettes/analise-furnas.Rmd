@@ -31,27 +31,86 @@ dados2016 =
 
 ```
 
+## Mapas interativos
+
+```{r}
+dados2016 |>
+  mutate(
+    manter =
+      case_when(
+        !duplicated(`código do município`) ~ TRUE,
+        duplicated(`código do município`) & (`tipo de serviço` == "Água") ~ TRUE,
+        duplicated(`código do município`) & (`tipo de serviço` != "Água") ~ FALSE
+      )
+  ) |>
+  filter(manter) |>
+  select(-manter)
+```
+```{r}
+df = 
+  dados2016 |>
+  filter(`tipo de serviço` != "Esgoto") |>
+  select(município, `código do município`, `score médio su`) |>
+  left_join(dados2021[, c('código do município', 'score médio su')], by = 'código do município' ) |>
+  `colnames<-`(c('município','código do município','su_antes','su_depois')) |>
+  mutate(
+    su_dif = su_depois - su_antes
+  )
+
+```
+
+```{r}
+t.test(df$su_dif, mu = 0)
+```
+
+```{r}
+ibge =
+    system.file("extdata", "RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", package = "snis") |>
+    readODS::read_ods(skip = 6) |>
+    select(c("Código Município Completo",
+              "Região Geográfica Intermediária",
+              "Nome Região Geográfica Intermediária")) |>
+    `colnames<-`(c("código do município",
+                   "código da região intermediária",
+                   "região intermediária"))
+
+df =
+  df |>
+  left_join(ibge, by = "código do município")
+```
 
 
+## Mapas interativos
 
 ```{r}
 plot_interactive_map(dados2016, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2016",  quart = FALSE)
-
 ```
+
+
 ```{r}
 plot_interactive_map(dados2021, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2021", quart = FALSE)
-
 ```
+
+```{r}
+plot_interactive_map(df, score_col = "su_dif", group_col = "região intermediária", titulo = "Mapa SU Diferenças", quart = FALSE)
+```
+
+## Tabelas
+
 ```{r}
 table_top_bottom(dados2016, top_n = 10, bottom_n = 10)
 ```
+
 ```{r}
 table_top_bottom(dados2021, top_n = 10, bottom_n = 10)
 ```
 
+## Gráficos score
+
 ```{r}
 plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2016")
 ```
+
 ```{r}
 plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2016")
 ```
@@ -59,15 +118,21 @@ plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "tipo de se
 ```{r}
 plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2021")
 ```
+
 ```{r}
 plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2021")
 ```
+
 ```{r}
 plot_median_barplot(dados2016, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2016")
 ```
+
 ```{r}
 plot_median_barplot(dados2021, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2021")
 ```
+
+## Gráficos variáveis
+
 ```{r}
 plot_hist_score(dados2016, group_col = "IN023", titulo = "Densidade IN023 2016")
 ```
