@@ -70,6 +70,7 @@ plot_median_barplot(dados2021, score_cols = "score médio su", group_cols = "nat
 ```
 ```{r}
 plot_hist_score(dados2016, group_col = "IN023", titulo = "Densidade IN023 2016")
+plot_density_score(dados2016, group_col = "IN023", titulo = "Densidade IN023 2016")
 ```
 
 ```{r}
