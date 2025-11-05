@@ -8,7 +8,7 @@
 #'
 # dados retirados de https://app4.cidades.gov.br/serieHistorica/
 read = function(ano) {
-  stopifnot("Ano deve estar entre 2015 e 2022" = ano %in% 2010:2022)
+  stopifnot("Ano deve estar entre 2000 e 2022" = ano %in% 2000:2022)
 
   ibge =
     system.file("extdata", "RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", package = "snis") |>
@@ -34,7 +34,6 @@ read = function(ano) {
     system.file("extdata",
                 paste0("Desagregado-", ano, ".csv"),
                 package = "snis") |>
-    #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines(1) |>
     strsplit(";") |>
@@ -47,8 +46,6 @@ read = function(ano) {
     system.file("extdata",
                 paste0("Desagregado-", ano, ".csv"),
                 package = "snis") |>
-    #paste0("data/Desagregado-", ano, ".csv") |>
-    #system.file("data", paste0("data/Desagregado-", ano, ".csv"), package = "snis") |>
     file(encoding = "UTF-16LE") |>
     readLines() |>
     {\(.) .[2:(length(.)-1)] }() |>
@@ -121,21 +118,28 @@ process_data = function(ano) {
              ~ case_when(
                is.na(.) & .data$`tipo de serviço` == "Água" ~ 0,
                TRUE ~ .
-    )))
+               )
+             ),
+      IN003 = case_when(
+        .data$IN003 == 0 ~ NA,
+        TRUE ~ .data$IN003
+        )
+    )
 
   #IN024 tem multicolinearidade com IN047
   #AG022 tem multicolineadidade com AG013
   #### Excluindo IN047 e AG013 para imputar IN024 e AG022
-  numerico2 = c(
-    "POP_URB","POP_TOT","IN006","IN016","AG022",
-    "IN002","IN031","IN101","IN049","IN019","IN023","IN024",
-    "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
-    "IN015","IN009","IN013","IN029","IN058","IN004","IN003"
-  )
-  numerico = c(numerico2, "AG013", "IN047")
+  numerico2 = c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
+                "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
+                "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
+                "POP_URB","POP_TOT","IN006","IN016","AG022")
+  numerico = c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
+               "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
+               "IN015","IN009","IN013","IN029","IN058","IN004","IN003","POP_URB",
+               "POP_TOT","AG013","IN006","IN016","IN047","AG022")
 
-  input1 = mice::mice(df[,numerico],  m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |> suppressWarnings()
-  input2 = mice::mice(df[,numerico2], m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |>suppressWarnings()
+  input1 = mice::mice(df[,numerico],      m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |> suppressWarnings()
+  input2 = mice::mice(input1[,numerico2], m = 5, method = "cart", printFlag = FALSE, seed = 1) |> complete() |> as_tibble() |> suppressWarnings()
 
   df_input =
     input1 |>

@@ -3,9 +3,9 @@ df_features_dh <- read_excel("data2/DADOS_SCORE_21_09_Pablo.xlsx", sheet = "Plan
 df <- readxl::read_excel("data2/dados tratados missing 5.xlsx") #%>% janitor::clean_names()
 
 
-df = process_data(2019)
-FA_EEE = fa(df)
-FA_SU  = fa(df, features = readODS::read_ods("data/features.ods", sheet = "SU"))
+df = process_data(2016)
+FA_EEE = fa(df, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "EEE"))
+FA_SU  = fa(df, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "SU"))
 df_ = update_df_fa(df, FA_EEE, FA_SU)
 
 boxplot(df_$`score médio eee` ~ quartile(df_$IN004))
@@ -21,13 +21,13 @@ plot_loading(FA_SU)
 
 
 dados = list()
-for (ano in 2010:2022) {
+for (ano in 2000:2022) {
   cat("\nProcessando ano", ano, "... ")
   df = tryCatch(
     {
       x = process_data(ano)
-      FA_EEE = fa(x)
-      FA_SU  = fa(x, grupos = readODS::read_ods("data/grupos.ods", sheet = "SU"))
+      FA_EEE = fa(x, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "EEE"))
+      FA_SU  = fa(x, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "SU"))
       update_df_fa(x, FA_EEE, FA_SU)
     },
     error = function(e) {
@@ -40,13 +40,14 @@ for (ano in 2010:2022) {
   FA_EEE =
   FA_SU  =
 
-  dados[[as.character(ano)]]$df     = df
-  dados[[as.character(ano)]]$fa$eee = fa(df)
-  dados[[as.character(ano)]]$fa$su  = fa(df, grupos = readODS::read_ods("data/grupos.ods", sheet = "SU"))
-  dados[[as.character(ano)]]$grupos$eee = readODS::read_ods("data/grupos.ods", sheet = "EEE")
-  dados[[as.character(ano)]]$grupos$su  = readODS::read_ods("data/grupos.ods", sheet = "SU")
+  dados[[as.character(ano)]]$df         = df
+  dados[[as.character(ano)]]$fa$eee     = fa(df, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "EEE"))
+  dados[[as.character(ano)]]$fa$su      = fa(df, grupos = readODS::read_ods("inst/extdata/grupos.ods", sheet = "SU"))
+  dados[[as.character(ano)]]$grupos$eee = readODS::read_ods("inst/extdata/grupos.ods", sheet = "EEE")
+  dados[[as.character(ano)]]$grupos$su  = readODS::read_ods("inst/extdata/grupos.ods", sheet = "SU")
 }
-saveRDS(dados, "data/dados.rds")
+saveRDS(dados, "inst/extdata/dados.rds")
+usethis::use_data(dados)
 
 dados = readRDS("data/dados.rds")
 for (ano in 2010:2022) {
