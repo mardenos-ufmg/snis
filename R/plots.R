@@ -155,30 +155,32 @@ table_top_bottom <- function(df, top_n, bottom_n) {
     dplyr::summarise(
       Sustentabilidade = mean(`score sustentabilidade`, na.rm = TRUE),
       Universalidade = mean(`score universalidade`, na.rm = TRUE),
-      Score_Medio = mean(`score médio su`, na.rm = TRUE),
+      Score_Médio = mean(`score médio su`, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     dplyr::mutate(
       Sustentabilidade = round(Sustentabilidade, 3),
       Universalidade = round(Universalidade, 3),
-      Score_Medio = round(Score_Medio, 3)
+      Score_Médio = round(Score_Médio, 3)
     )
 
   top_scores <- df_aux %>%
-    dplyr::arrange(desc(Score_Medio)) %>%
+    dplyr::arrange(desc(Score_Médio)) %>%
     dplyr::slice_head(n = top_n) %>%
     dplyr::rename(
       Município = município,
-      Natureza_jurídica = `natureza jurídica`
-    )
+      Natureza_Jurídica = `natureza jurídica`
+    ) %>%
+    dplyr::select(Município, Score_Médio, Sustentabilidade, Universalidade, Natureza_Jurídica)
 
   bottom_scores <- df_aux %>%
-    dplyr::arrange(Score_Medio) %>%
+    dplyr::arrange(Score_Médio) %>%
     dplyr::slice_head(n = bottom_n) %>%
     dplyr::rename(
       Município = município,
-      Natureza_jurídica = `natureza jurídica`
-    )
+      Natureza_Jurídica = `natureza jurídica`
+    ) %>%
+    dplyr::select(Município, Score_Médio, Sustentabilidade, Universalidade, Natureza_Jurídica)
 
   list(
     Melhores = top_scores,
@@ -463,4 +465,79 @@ plot_interactive_map <- function(df, score_col, group_col, titulo = NULL, quart 
     )
 
   return(mapa)
+}
+
+#' Histograma de uma variável numérica
+#'
+#' Cria um histograma mostrando a distribuição dos valores de uma variável numérica.
+#'
+#' @param df Data frame contendo os dados.
+#' @param var_col String com o nome da coluna numérica a ser analisada, como `"IN023"`.
+#' @param titulo (opcional) Título do gráfico. Se `NULL`, é gerado automaticamente.
+#'
+#' @return Um objeto `ggplot` com o histograma.
+#'
+#' @export
+plot_hist_score <- function(df, group_col, titulo = NULL) {
+  if (!group_col %in% colnames(df)) {
+    stop("❌ A coluna informada não existe no dataframe.")
+  }
+
+  if (is.null(titulo)) {
+    titulo <- paste0("Distribuição de ", group_col)
+  }
+
+  ggplot(df, aes(x = .data[[group_col]])) +
+    geom_histogram(
+      bins = 30,
+      fill = viridis::viridis(1, option = "plasma"),
+      color = "white",
+      alpha = 0.8
+    ) +
+    labs(
+      title = titulo,
+      x = group_col,
+      y = "Frequência"
+    ) +
+    theme_minimal(base_size = 13) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold")
+    )
+}
+#' Densidade de uma variável numérica
+#'
+#' Cria um gráfico de densidade mostrando a distribuição suave dos valores
+#' de uma variável numérica, como uma "onda".
+#'
+#' @param df Data frame contendo os dados.
+#' @param var_col String com o nome da coluna numérica a ser analisada, como `"IN023"`.
+#' @param titulo (opcional) Título do gráfico. Se `NULL`, é gerado automaticamente.
+#'
+#' @return Um objeto `ggplot` com o gráfico de densidade.
+#'
+#' @export
+plot_density_score <- function(df, group_col, titulo = NULL) {
+  if (!group_col %in% colnames(df)) {
+    stop("❌ A coluna informada não existe no dataframe.")
+  }
+
+  if (is.null(titulo)) {
+    titulo <- paste0("Distribuição de Densidade de ", group_col)
+  }
+
+  ggplot(df, aes(x = .data[[group_col]])) +
+    geom_density(
+      fill = viridis::viridis(1, option = "plasma"),
+      color = "black",
+      alpha = 0.7
+    ) +
+    labs(
+      title = titulo,
+      x = group_col,
+      y = "Densidade"
+    ) +
+    theme_minimal(base_size = 13) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold")
+    )
 }

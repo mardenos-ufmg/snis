@@ -29,13 +29,83 @@ dados2016 =
   dados$"2016"$df |>
   filter(`código do município` %in% alago$Codmun)
 
-plot_map(dados2021, "score médio su")
 ```
 
 
 
 
 ```{r}
-plot_map(dados2016, "score médio su")
+plot_interactive_map(dados2016, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2016",  quart = FALSE)
 
 ```
+```{r}
+plot_interactive_map(dados2021, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2021", quart = FALSE)
+
+```
+```{r}
+table_top_bottom(dados2016, top_n = 10, bottom_n = 10)
+```
+```{r}
+table_top_bottom(dados2021, top_n = 10, bottom_n = 10)
+```
+
+```{r}
+plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2016")
+```
+```{r}
+plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2016")
+```
+
+```{r}
+plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2021")
+```
+```{r}
+plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2021")
+```
+```{r}
+plot_median_barplot(dados2016, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2016")
+```
+```{r}
+plot_median_barplot(dados2021, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2021")
+```
+```{r}
+plot_hist_score(dados2016, group_col = "IN023", titulo = "Densidade IN023 2016")
+```
+
+```{r}
+#IN023 = Índice de atendimento urbano de água
+plot_hist_score(dados2021, group_col = "IN023", titulo = "Densidade IN023 2021")
+```
+```{r}
+#IN055 	Índice de atendimento total de água
+plot_hist_score(dados2016, group_col = "IN055", titulo = "Densidade IN055 2016")
+plot_density_score(dados2016, group_col = "IN055", titulo = "Densidade IN055 2016")
+```
+```{r}
+plot_hist_score(dados2021, group_col = "IN055", titulo = "Densidade IN055 2021")
+plot_density_score(dados2021, group_col = "IN055", titulo = "Densidade IN055 2021")
+```
+```{r}
+dados_comparados <- bind_rows(
+  dados2016 %>%
+    select(POP = POP_URB) %>%
+    mutate(Ano = "2016"),
+  dados2021 %>%
+    select(POP = POP_URB) %>%
+    mutate(Ano = "2021")
+)
+
+ggplot(dados_comparados, aes(x = POP, fill = Ano)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Densidade da População Urbana — 2016 vs 2021",
+    x = "População Urbana",
+    y = "Densidade"
+  ) +
+  scale_x_continuous(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal()
+
+
+```
+
+
