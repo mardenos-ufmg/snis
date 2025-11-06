@@ -9,9 +9,17 @@ Para utilizar o pacote, siga alguma das opções abaixo.
 Em ambos os casos é interessante instalar o pacote `pak` em seu ambiente R via `install.packages("pak")` e usar o [RStudio](https://posit.co/download/rstudio-desktop/).
 Sempre que houver uma alteração no pacote será necessário repetir o procedimento para usufruir das atualizações.
 
+## Via `pak`
+
+Instale o `pak` em seu ambiente R e, em seguida, instale o `snis` via `pak`.
+
+``` r
+if (!{"pak" %in% rownames(installed.packages())}) install.packages("pak")
+pak::pak("mardenos-ufmg/snis")
+```
+
 ## Via `devtools`
 
-Como o pacote está em desenvolvimento e em constante mudança, esse método é recomendado.
 Primeiro é necessário baixar a pasta do nosso repositório no GitHub.
 O jeito mais fácil é acessando o [nosso repositório no GitHub](https://github.com/mardenos-ufmg/snis) e clicando no botão verde escrito `code` e em seguida `Download Zip`.
 Em seguida faça a descompressão (unzip) da pasta e instale o `devtools` via R no seu PC.
@@ -30,12 +38,3 @@ pak::pak("devtools")
 Em seguida abra o repositório `snis` descompactado em seu PC e clique em `snis.Rproj`.
 Isso iniciará uma sessão do RStudio com o projeto já aberto.
 Finalmente, rode no console do RStudio o comando `devtools::load_all()` e você poderá usar todas as funções do nosso pacote!
-
-## Via `pak`
-
-Instale o `pak` em seu ambiente R e, em seguida, instale o `snis` via `pak`.
-
-``` r
-if !("pak" %in% rownames(installed.packages())) install.packages("pak")
-pak::pak("mardenos-ufmg/snis")
-```
