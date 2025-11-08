@@ -1,3 +1,11 @@
+#' ShinyApp
+#'
+#' Função geradora da aplicação em Shiny do pacote SNIS
+#'
+#' @export
+#'
+#' @importFrom DT dataTableOutput datatable
+#' @importFrom tmap tmapOutput renderTmap
 shiny = function() {
   header_col = function(title, color, height, width = 12) {
     column(width,
@@ -17,8 +25,6 @@ shiny = function() {
     )
   }
 
-  dados = dados
-
   ###########################
   #####  Painel Tabela  #####
   ###########################
@@ -33,7 +39,7 @@ shiny = function() {
     fluidRow(
       column(7,
         fluidRow(header_col("Mapa", "#a8f2fe", 8)),
-        plotly::plotlyOutput("tabela-mapa")
+        tmap::tmapOutput("tabela-mapa")
       ),
       column(5,
         fluidRow(header_col("Resumo", "#a8f2fe", 8)),
@@ -64,7 +70,7 @@ shiny = function() {
 
     fluidRow(
       column(8,
-        plotly::plotlyOutput("fa-scores-mapa")
+        tmap::tmapOutput("fa-scores-mapa")
       ),
       column(4,
         tableOutput("fa-scores-summary")
@@ -107,13 +113,14 @@ shiny = function() {
     ano   = reactive({ input$"geral-ano" })
     #var   = reactive({ input$"fa-scores-var" })
     #quart = reactive({ input$"fa-scores-quart" })
-    df    = reactive({ dados[[ano()]]$df })
+    df    = reactive({ dados_snis[[ano()]]$df })
 
     ###  PainelFA  ###
-    output$"fa-scores-mapa" = plotly::renderPlotly({
+    output$"fa-scores-mapa" = tmap::renderTmap({
       req(df())
-      plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
-        plotly::ggplotly()
+      mapa_interativo(df(), score_col = input$"fa-scores-var", quart = input$"fa-scores-quart") |> suppressMessages()
+      # plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
+      #   plotly::ggplotly()
     })
 
     observeEvent(df(), {
@@ -135,22 +142,27 @@ shiny = function() {
     output$"fa-loadings-eee" = renderPlot({
       req(ano())
       #FA_EEE = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "EEE"))
-      plot_loading(dados[[ano()]]$fa$eee)
+      plot_loading(dados_snis[[ano()]]$fa$eee)
     })
 
     output$"fa-loadings-su" = renderPlot({
       req(ano())
       #FA_SU = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "SU"))
-      plot_loading(dados[[ano()]]$fa$su)
+      plot_loading(dados_snis[[ano()]]$fa$su)
     })
 
     ###  PainelTabela  ###
     output$"tabela-tabela" = DT::renderDataTable({
       DT::datatable(df(),
                     selection = list(mode = "single", target = "column"),
-                    options = list(scrollX = TRUE),
-                    rownames = FALSE
+                    rownames = FALSE, filter = 'none',
+                    extensions = c('FixedColumns'),
+                    options = list(
+                      dom = 'Bfrtip',
+                      paging = TRUE, searching = TRUE, info = FALSE,
+                      sort = TRUE, scrollX = TRUE, fixedColumns = list(leftColumns = 3)
                     )
+                  )
     })
 
     coluna_selecionada = reactive({
@@ -181,9 +193,8 @@ shiny = function() {
         as.data.frame()
     })
 
-    output$"tabela-mapa" = plotly::renderPlotly({
-      plot_map(df(), coluna_selecionada(), F) |>
-        plotly::ggplotly()
+    output$"tabela-mapa" = tmap::renderTmap({
+      mapa_interativo(df(), coluna_selecionada(), quart = T) |> suppressMessages()
     })
 
   }

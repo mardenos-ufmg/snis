@@ -12,7 +12,8 @@ Depends:
     R (>= 4.0.0),
     ggplot2,
     shiny,
-    tidyverse
+    tidyverse,
+    tmap
 Imports:
     readxl,
     mice,

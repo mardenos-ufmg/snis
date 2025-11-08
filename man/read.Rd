@@ -2,16 +2,62 @@
 % Please edit documentation in R/get_data.R
 \name{read}
 \alias{read}
-\title{Ler CSV}
+\title{Ler CSV do SNIS}
 \usage{
 read(ano)
 }
 \arguments{
-\item{ano}{integer between 2010&}
+\item{ano}{inteiro entre 2000 e 2022}
 }
 \value{
-tibble::tibble
+tibble
 }
 \description{
-Ler CSV
+Ler CSV do SNIS
 }
+\section{Origem dos dados}{
+
+
+Os dados foram retirados de \verb{https://app4.cidades.gov.br/serieHistorica/} com as seguintes opções:
+\itemize{
+\item Informações e indicadores desagregados;
+\item Ano de referẽncia: \code{ano};
+\item Região: \code{Sudeste};
+\item Estado: \verb{Minas Gerais};
+\item Demais filtros: \verb{Marcar todos}.
+}
+}
+
+\section{Estrutura do CSV}{
+
+
+Por meio da função \code{readr::guess_encoding()} podemos ver que a codificação dos CSVs é \verb{UTF-16LE}.
+
+As colunas são separadas por \verb{;} e possuem um \verb{;} extra ao final de cada linha, o que pode produzir uma coluna
+extra a depender da forma como esse arquivo é lido. Isso foi evitado aqui por meio da exclusão do último caractere
+de cada durante a leitra do CSV.
+
+A última linha - que originalmente continha valores totais das variáveis da amostra - foi excluída.
+
+Para os números, o separador decimal original era a vírgula e o de centenas, o ponto.
+}
+
+\section{Estilo}{
+
+
+Optamos por manter acentos e diacríticos (como o til) no nome das colunas, mas o nome de
+todas as colunas foi passada para caracteres minúsculos. Originalmente, a descrição de cada variável
+estava no pŕoprio nome da coluna, após um travessão \code{-}, mas aqui optamos por excluir tudo o que
+vinha depois disso. A descrição das variáveis está disponível na vinheta
+\href{https://mardenos-ufmg.github.io/snis/articles/dados.html}{\code{dados}}.
+}
+
+\section{IBGE}{
+
+
+Originalmente, o \verb{código do município} no CSV não continha o último dígito de verificação.
+Optamos por colocar esse último dígito, conforme padrão do IBGE.
+Ainda de acordo com o IBGE, as colunas referentes à \verb{região intermediária} e à \verb{região imediata}
+foram adicionadas.
+}
+

@@ -1,43 +1,3 @@
-#' Title
-#'
-#' @param df .
-#' @param var .
-#' @param quart .
-#'
-#' @returns ggplot
-#'
-#' @export
-plot_map = function(df, var, quart = F) {
-  df =
-    df[c("código do município", var)] |>
-    dplyr::mutate(`código do município` = as.numeric(`código do município`))
-
-  legenda = colnames(df)[2]
-  colnames(df)[2] = "var"
-
-  if (quart) {
-    df[[2]] = df[[2]] |> quartile()
-    legenda = paste0(legenda, "\n(quartis)")
-  }
-
-  mapa =
-    mapa_MG |>
-    dplyr::left_join(df, by = c("code_muni" = "código do município")) |>
-    sf::st_as_sf()
-
-  ggplot(mapa) +
-    geom_sf(aes(fill = .data[["var"]]), color = NA) +
-    {if ( quart | is.factor(df$var) ) {
-      scale_fill_viridis_d(option = "plasma", na.value = "grey90")
-    } else {
-      scale_fill_viridis_c(option = "plasma", na.value = "grey90")
-    }
-    } +
-    labs(title = "Mapa",
-         fill = legenda) +
-    theme_void()
-}
-
 #' Heatmap das Cargas Fatoriais por Grupo
 #'
 #' Essa função gera um conjunto de heatmaps mostrando as cargas fatoriais (`loadings`)
@@ -88,53 +48,88 @@ plot_loading = function(FA) {
   gridExtra::grid.arrange(grobs = plot_list, ncol = length(grupos))
 }
 
-#' Tabela dos Rankings
+
+#' Mapa interativo de Scores por Região
 #'
-#' Gera uma Tabela com o Ranking dos Municípios com base no Score Médio das categorias desejadas.
+#' Gera um mapa interativo mostrando a distribuição de um score por região,
+#' colorindo os municípios de acordo com quartis do score.
 #'
 #' @param df Data frame contendo os dados.
-#' @param top_n (opcional) Número de municípios a serem exibidos no ranking final.
-#'   Se não for especificado, retorna 10 municípios.
+#' @param score_col String com o nome da coluna que contém o score, como `"score médio su"`.
+#' @param titulo (opcional) Título do mapa. Se `NULL`, é gerado automaticamente com base no nome da coluna de score.
+#' @param quart (opcional) Lógico. Se `TRUE`, colore os municípios por **quartis** do score;
+#'   se `FALSE` (padrão), usa os valores contínuos.
 #'
-#' @return Um data frame contendo as colunas:
-#'   - `município`: nome do município;
-#'   - `Ranking`: posição no ranking baseado no Score Médio;
-#'   - `Rank_Medio`: ranking médio de todas as dimensões;
-#'   - `Diferenca`: diferença entre o Ranking e o Rank_Medio;
-#'   - `Sustentabilidade`, `Universalidade`, `Score_Medio`: valores médios dos scores;
+#' @return Um objeto `tmap` interativo com os municípios coloridos por quartis do score.
 #'
 #' @export
-table_ranking <- function(df, top_n = 10) {
+#'
+#' @importFrom viridis turbo
+mapa_interativo <- function(df, score_col , titulo = NULL, quart = FALSE) {
+  group_col = "região intermediária"
 
-  df_score <- df %>%
-    dplyr::group_by(município, `código do município`) %>%
-    dplyr::summarise(
-      Sustentabilidade = mean(`score sustentabilidade`, na.rm = TRUE),
-      Universalidade   = mean(`score universalidade`, na.rm = TRUE),
-      Score_Medio      = mean(`score médio su`, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  df_score <- df_score %>%
-    dplyr::arrange(desc(Score_Medio)) %>%
-    dplyr::mutate(Ranking = dplyr::row_number())
-
-  df_score <- df_score %>%
-    dplyr::arrange(desc(Sustentabilidade + Universalidade)) %>%
-    dplyr::mutate(Rank_Medio = dplyr::row_number()) %>%
-    dplyr::arrange(Ranking)
-
-  df_score <- df_score %>%
-    dplyr::mutate(Diferenca = Ranking - Rank_Medio) %>%
-    dplyr::select(município, Ranking, Rank_Medio, Diferenca,
-                  Sustentabilidade, Universalidade, Score_Medio)
-
-  if (!is.null(top_n)) {
-    df_score <- head(df_score, top_n)
+  if (!all(c(score_col, "município", group_col) %in% colnames(df))) {
+    stop("❌ O dataframe não contém todas as colunas necessárias: ",
+         paste(c("município", score_col, group_col), collapse = ", "))
   }
 
-  return(df_score)
+  if (is.null(titulo)) {
+    titulo <- paste0("Mapa Interativo de ", score_col)
+  }
+
+  df_aux <-
+    df %>%
+    select(
+      name = all_of("município"),
+      Score = all_of(score_col),
+      Grupo = all_of(group_col)
+    ) %>%
+    mutate(Score = round(Score, 4)) %>%
+    distinct(name, .keep_all = TRUE)
+
+  geo_merged <-
+    mapa_MG %>%
+    left_join(df_aux, by = "name")
+
+  if (quart) {
+    geo_merged <-
+      geo_merged %>%
+      mutate(
+        Score_Quartil = cut(Score,
+                            breaks = quantile(Score, probs = 0:4/4, na.rm = TRUE),
+                            include.lowest = TRUE,
+                            labels = c("Q1","Q2","Q3","Q4"))
+      )
+    fill_var <- "Score_Quartil"
+    style <- "cat"
+    cores <- c("#922B21", "#E67E22", "#F4D03F", "#52BE80")
+  } else {
+    fill_var <- "Score"
+    style <- "cont"
+    cores <- viridis::turbo(100, direction = -1)
+  }
+
+  tmap::tmap_mode("view")
+  mapa <- tmap::tm_shape(geo_merged) +
+    tmap::tm_fill(
+      col = fill_var,
+      title = titulo,
+      style = style,
+      palette = cores,
+      popup.vars = c("name", "Grupo", fill_var, "Score")
+    ) +
+    tmap::tm_borders(col = "gray50", lwd = 0.5) +
+    tmap::tm_basemap(server = "OpenStreetMap") +
+    tmap::tm_view(set.view = c(lon = -43.98, lat = -19.84, zoom = 6)) +
+    tmap::tm_layout(
+      main.title = titulo,
+      main.title.position = "center",
+      legend.outside = TRUE
+    )
+
+  return(mapa)
 }
+
 
 #' Tabela dos Melhores e Piores municípios
 #'
@@ -385,87 +380,7 @@ table_median <- function(df, score_cols, group_cols) {
 }
 
 
-#' Mapa interativo de Scores por Região
-#'
-#' Gera um mapa interativo mostrando a distribuição de um score por região,
-#' colorindo os municípios de acordo com quartis do score.
-#'
-#' @param df Data frame contendo os dados.
-#' @param score_col String com o nome da coluna que contém o score, como `"score médio su"`.
-#' @param group_col String com o nome da coluna categórica que define a região, como `"região intermediária"`.
-#' @param titulo (opcional) Título do mapa. Se `NULL`, é gerado automaticamente com base no nome da coluna de score.
-#' @param quart (opcional) Lógico. Se `TRUE`, colore os municípios por **quartis** do score;
-#'   se `FALSE` (padrão), usa os valores contínuos.
-#' @return Um objeto `tmap` interativo com os municípios coloridos por quartis do score.
-#'
-#' @export
-plot_interactive_map <- function(df, score_col, group_col, titulo = NULL, quart = FALSE) {
 
-  if (!requireNamespace("sf", quietly = TRUE) ||
-      !requireNamespace("tmap", quietly = TRUE)) {
-    stop("❌ Os pacotes 'sf' e 'tmap' são necessários para esta função.")
-  }
-
-
-  if (!all(c(score_col, "município", group_col) %in% colnames(df))) {
-    stop("❌ O dataframe não contém todas as colunas necessárias: ",
-         paste(c("município", score_col, group_col), collapse = ", "))
-  }
-
-  df_aux <- df %>%
-    dplyr::select(
-      name = dplyr::all_of("município"),
-      Score = dplyr::all_of(score_col),
-      Grupo = dplyr::all_of(group_col)
-    ) %>%
-    dplyr::mutate(Score = round(Score, 4)) %>%
-    dplyr::distinct(name, .keep_all = TRUE)
-
-  geo_merged <-
-    geo_data_sf %>%
-    dplyr::left_join(df_aux, by = "name")
-
-  if (is.null(titulo)) {
-    titulo <- paste0("Mapa Interativo de ", score_col)
-  }
-
-  if (quart) {
-    geo_merged <- geo_merged %>%
-      dplyr::mutate(
-        Score_Quartil = cut(Score,
-                            breaks = quantile(Score, probs = 0:4/4, na.rm = TRUE),
-                            include.lowest = TRUE,
-                            labels = c("Q1","Q2","Q3","Q4"))
-      )
-    fill_var <- "Score_Quartil"
-    style <- "cat"
-    cores <- c("#922B21", "#E67E22", "#F4D03F", "#52BE80")
-  } else {
-    fill_var <- "Score"
-    style <- "cont"
-    cores <- viridis::turbo(100, direction = -1)
-  }
-
-  tmap::tmap_mode("view")
-  mapa <- tmap::tm_shape(geo_merged) +
-    tmap::tm_fill(
-      col = fill_var,
-      title = titulo,
-      style = style,
-      palette = cores,
-      popup.vars = c("name", "Grupo", fill_var, "Score")
-    ) +
-    tmap::tm_borders(col = "gray50", lwd = 0.5) +
-    tmap::tm_basemap(server = "OpenStreetMap") +
-    tmap::tm_view(set.view = c(lon = -43.98, lat = -19.84, zoom = 6)) +
-    tmap::tm_layout(
-      main.title = titulo,
-      main.title.position = "center",
-      legend.outside = TRUE
-    )
-
-  return(mapa)
-}
 
 #' Histograma de uma variável numérica
 #'
@@ -504,6 +419,8 @@ plot_hist_score <- function(df, group_col, titulo = NULL) {
       plot.title = element_text(hjust = 0.5, face = "bold")
     )
 }
+
+
 #' Densidade de uma variável numérica
 #'
 #' Cria um gráfico de densidade mostrando a distribuição suave dos valores
@@ -540,4 +457,53 @@ plot_density_score <- function(df, group_col, titulo = NULL) {
     theme(
       plot.title = element_text(hjust = 0.5, face = "bold")
     )
+}
+
+
+#' Tabela dos Rankings
+#'
+#' Gera uma Tabela com o Ranking dos Municípios com base no Score Médio das categorias desejadas.
+#'
+#' @param df Data frame contendo os dados.
+#' @param top_n (opcional) Número de municípios a serem exibidos no ranking final.
+#'   Se não for especificado, retorna 10 municípios.
+#'
+#' @return Um data frame contendo as colunas:
+#'   - `município`: nome do município;
+#'   - `Ranking`: posição no ranking baseado no Score Médio;
+#'   - `Rank_Medio`: ranking médio de todas as dimensões;
+#'   - `Diferenca`: diferença entre o Ranking e o Rank_Medio;
+#'   - `Sustentabilidade`, `Universalidade`, `Score_Medio`: valores médios dos scores;
+#'
+#' @export
+table_ranking <- function(df, top_n = 10) {
+
+  df_score <- df %>%
+    dplyr::group_by(município, `código do município`) %>%
+    dplyr::summarise(
+      Sustentabilidade = mean(`score sustentabilidade`, na.rm = TRUE),
+      Universalidade   = mean(`score universalidade`, na.rm = TRUE),
+      Score_Medio      = mean(`score médio su`, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  df_score <- df_score %>%
+    dplyr::arrange(desc(Score_Medio)) %>%
+    dplyr::mutate(Ranking = dplyr::row_number())
+
+  df_score <- df_score %>%
+    dplyr::arrange(desc(Sustentabilidade + Universalidade)) %>%
+    dplyr::mutate(Rank_Medio = dplyr::row_number()) %>%
+    dplyr::arrange(Ranking)
+
+  df_score <- df_score %>%
+    dplyr::mutate(Diferenca = Ranking - Rank_Medio) %>%
+    dplyr::select(município, Ranking, Rank_Medio, Diferenca,
+                  Sustentabilidade, Universalidade, Score_Medio)
+
+  if (!is.null(top_n)) {
+    df_score <- head(df_score, top_n)
+  }
+
+  return(df_score)
 }

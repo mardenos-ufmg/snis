@@ -1,12 +1,54 @@
-#' Ler CSV
+#' Ler CSV do SNIS
 #'
-#' @param ano integer between 2010&
+#' @section Origem dos dados:
 #'
-#' @returns tibble::tibble
+#' Os dados foram retirados de `https://app4.cidades.gov.br/serieHistorica/` com as seguintes opções:
+#' - Informações e indicadores desagregados;
+#' - Ano de referẽncia: `ano`;
+#' - Região: `Sudeste`;
+#' - Estado: `Minas Gerais`;
+#' - Demais filtros: `Marcar todos`.
+#'
+#'
+#' @section Estrutura do CSV:
+#'
+#' Por meio da função `readr::guess_encoding()` podemos ver que a codificação dos CSVs é `UTF-16LE`.
+#'
+#' As colunas são separadas por `;` e possuem um `;` extra ao final de cada linha, o que pode produzir uma coluna
+#' extra a depender da forma como esse arquivo é lido. Isso foi evitado aqui por meio da exclusão do último caractere
+#' de cada durante a leitra do CSV.
+#'
+#' A última linha - que originalmente continha valores totais das variáveis da amostra - foi excluída.
+#'
+#' Para os números, o separador decimal original era a vírgula e o de centenas, o ponto.
+#'
+#'
+#' @section Estilo:
+#'
+#' Optamos por manter acentos e diacríticos (como o til) no nome das colunas, mas o nome de
+#' todas as colunas foi passada para caracteres minúsculos. Originalmente, a descrição de cada variável
+#' estava no pŕoprio nome da coluna, após um travessão `-`, mas aqui optamos por excluir tudo o que
+#' vinha depois disso. A descrição das variáveis está disponível na vinheta
+#' \href{https://mardenos-ufmg.github.io/snis/articles/dados.html}{`dados`}.
+#'
+#'
+#' @section IBGE:
+#'
+#' Originalmente, o `código do município` no CSV não continha o último dígito de verificação.
+#' Optamos por colocar esse último dígito, conforme padrão do IBGE.
+#' Ainda de acordo com o IBGE, as colunas referentes à `região intermediária` e à `região imediata`
+#' foram adicionadas.
+#'
+#'
+#' @param ano inteiro entre 2000 e 2022
+#'
+#' @returns tibble
 #'
 #' @export
 #'
-# dados retirados de https://app4.cidades.gov.br/serieHistorica/
+#' @importFrom purrr pluck
+#' @importFrom readODS read_ods
+#' @importFrom readr parse_number locale
 read = function(ano) {
   stopifnot("Ano deve estar entre 2000 e 2022" = ano %in% 2000:2022)
 
@@ -14,10 +56,10 @@ read = function(ano) {
     system.file("extdata", "RELATORIO_DTB_BRASIL_2024_MUNICIPIOS.ods", package = "snis") |>
     readODS::read_ods(skip = 6) |>
     select(c("Código Município Completo",
-                    "Região Geográfica Intermediária",
-                    "Nome Região Geográfica Intermediária",
-                    "Região Geográfica Imediata",
-                    "Nome Região Geográfica Imediata")) |>
+             "Região Geográfica Intermediária",
+             "Nome Região Geográfica Intermediária",
+             "Região Geográfica Imediata",
+             "Nome Região Geográfica Imediata")) |>
     `colnames<-`(c("Código do Município",
                    "Código da Região Intermediária",
                    "Região Intermediária",
@@ -59,7 +101,7 @@ read = function(ano) {
         row.names = NULL
       )
     }() |>
-    tibble::as_tibble() |>
+    as_tibble() |>
     `colnames<-`(colnames) |>
     {\(.) mutate(.,
                         across(
@@ -89,14 +131,46 @@ read = function(ano) {
 }
 
 
-
-#' Processar dados
+#' Processar dados para análise fatorial
 #'
-#' @param ano inteiro
+#' Rotina de processamento (e criação) de variáveis para a aplicação de análise fatorial
 #'
-#' @returns tibble::tibble
+#' @section Inputação:
+#'
+#' A inputação foi feita pelo pacote `mice` em duas etapas. Detectamos que as seguintes variáveis têm
+#' forte correlação entre si: IN024 com IN047; AG022 com AG013. Como essa forte multicolinearidade piora
+#' a qualidade das previsões feitas pelo `mice`, decidimos excluindo IN047 e AG013 para a primeira
+#' fase de imputação (em que IN024 e AG022 são imputadas). Em seguida, usamos os valores imputados
+#' para prever IN047 e AG013.
+#'
+#' O pacote `mice` usa alguma aleatoriedade para suas previsões, por isso decidimos fixar a semente
+#' das previsões para que os mesmos resultados sejam retornados em cada ano.
+#'
+#' Os valores de algumas variáveis foram imputadas por simples lógica, como as que se seguem:
+#'
+#' - `IN003`: ;
+#'
+#'
+#' @section Variáveis criadas:
+#'
+#' Algumas variáveis foram criadas com as seguintes fórmulas:
+#'
+#' - `tarifa`: ;
+#' - `micromedida`: ;
+#' - `urbanização`: ;
+#' - `prestador2`: ;
+#'
+#'
+#'
+#' @inheritParams read
+#'
+#' @returns tibble
+#'
 #' @export
-process_data = function(ano) {
+#'
+#' @importFrom mice mice
+#' @importFrom readODS read_ods
+processar_dados = function(ano) {
   cols = c(
     "ano de referência","município","código do município",
     "natureza jurídica","tipo de serviço","abrangência",
@@ -126,9 +200,6 @@ process_data = function(ano) {
         )
     )
 
-  #IN024 tem multicolinearidade com IN047
-  #AG022 tem multicolineadidade com AG013
-  #### Excluindo IN047 e AG013 para imputar IN024 e AG022
   numerico2 = c("IN002","IN031","IN101","IN049","IN019","IN023","IN024",
                 "IN055","IN056","IN057","IN075","IN076","IN084","IN046",
                 "IN015","IN009","IN013","IN029","IN058","IN004","IN003",
@@ -195,7 +266,7 @@ process_data = function(ano) {
     df |>
     filter(!(.data$município %in% municipios_duplicados$município)) |>
     rbind(municipios_filter) |>
-    tibble::as_tibble() |>
+    as_tibble() |>
     relocate(c("prestador2", "tarifa", "micromedida", "urbanização"), .after = "prestador")
 
   df
