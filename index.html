@@ -52,24 +52,25 @@
 <p>Esse pacote tem por objetivo formalizar e disponibilizar funções para a leitura e análise de dados do SNIS (Sistema Nacional de Informações sobre Saneamento). As funções estão documentadas e há algumas vinhetas que ajudam a entender o funcionamento do pacote. Isso está disponível no <a href="https://mardenos-ufmg.github.io/snis/">site do pacote</a>.</p>
 <p>Para utilizar o pacote, siga alguma das opções abaixo. Em ambos os casos é interessante instalar o pacote <code>pak</code> em seu ambiente R via <code>install.packages("pak")</code> e usar o <a href="https://posit.co/download/rstudio-desktop/" class="external-link">RStudio</a>. Sempre que houver uma alteração no pacote será necessário repetir o procedimento para usufruir das atualizações.</p>
 <div class="section level2">
-<h2 id="via-devtools">Via <code>devtools</code>
-<a class="anchor" aria-label="anchor" href="#via-devtools"></a>
-</h2>
-<p>Como o pacote está em desenvolvimento e em constante mudança, esse método é recomendado. Primeiro é necessário baixar a pasta do nosso repositório no GitHub. O jeito mais fácil é acessando o <a href="https://github.com/mardenos-ufmg/snis" class="external-link">nosso repositório no GitHub</a> e clicando no botão verde escrito <code>code</code> e em seguida <code>Download Zip</code>. Em seguida faça a descompressão (unzip) da pasta e instale o <code>devtools</code> via R no seu PC.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span></code></pre></div>
-<p>ou, preferencialmente</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="cf">if</span> <span class="sc">!</span>(<span class="st">"pak"</span> <span class="sc">%in%</span> <span class="fu">rownames</span>(<span class="fu">installed.packages</span>())) <span class="fu">install.packages</span>(<span class="st">"pak"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">"devtools"</span>)</span></code></pre></div>
-<p>Em seguida abra o repositório <code>snis</code> descompactado em seu PC e clique em <code>snis.Rproj</code>. Isso iniciará uma sessão do RStudio com o projeto já aberto. Finalmente, rode no console do RStudio o comando <code>devtools::load_all()</code> e você poderá usar todas as funções do nosso pacote!</p>
-</div>
-<div class="section level2">
 <h2 id="via-pak">Via <code>pak</code>
 <a class="anchor" aria-label="anchor" href="#via-pak"></a>
 </h2>
 <p>Instale o <code>pak</code> em seu ambiente R e, em seguida, instale o <code>snis</code> via <code>pak</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="op">{</span><span class="st">"pak"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">}</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"mardenos-ufmg/snis"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="via-devtools">Via <code>devtools</code>
+<a class="anchor" aria-label="anchor" href="#via-devtools"></a>
+</h2>
+<p>Primeiro é necessário baixar a pasta do nosso repositório no GitHub. O jeito mais fácil é acessando o <a href="https://github.com/mardenos-ufmg/snis" class="external-link">nosso repositório no GitHub</a> e clicando no botão verde escrito <code>code</code> e em seguida <code>Download Zip</code>. Em seguida faça a descompressão (unzip) da pasta e instale o <code>devtools</code> via R no seu PC.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span></code></pre></div>
+<p>ou, preferencialmente</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="cf">if</span> <span class="sc">!</span>(<span class="st">"pak"</span> <span class="sc">%in%</span> <span class="fu">rownames</span>(<span class="fu">installed.packages</span>())) <span class="fu">install.packages</span>(<span class="st">"pak"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">"mardenos-ufmg/snis"</span>)</span></code></pre></div>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>pak<span class="sc">::</span><span class="fu">pak</span>(<span class="st">"devtools"</span>)</span></code></pre></div>
+<p>Em seguida abra o repositório <code>snis</code> descompactado em seu PC e clique em <code>snis.Rproj</code>. Isso iniciará uma sessão do RStudio com o projeto já aberto. Finalmente, rode no console do RStudio o comando <code>devtools::load_all()</code> e você poderá usar todas as funções do nosso pacote!</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -113,7 +114,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
