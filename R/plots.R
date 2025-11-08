@@ -55,7 +55,7 @@ plot_loading = function(FA) {
 #' colorindo os municípios de acordo com quartis do score.
 #'
 #' @param df Data frame contendo os dados.
-#' @param score_col String com o nome da coluna que contém o score, como `"score médio su"`.
+#' @param var String com o nome da coluna que contém o score, como `"score médio su"`.
 #' @param titulo (opcional) Título do mapa. Se `NULL`, é gerado automaticamente com base no nome da coluna de score.
 #' @param quart (opcional) Lógico. Se `TRUE`, colore os municípios por **quartis** do score;
 #'   se `FALSE` (padrão), usa os valores contínuos.
@@ -65,31 +65,30 @@ plot_loading = function(FA) {
 #' @export
 #'
 #' @importFrom viridis turbo
-mapa_interativo <- function(df, score_col , titulo = NULL, quart = FALSE) {
-  group_col = "região intermediária"
-
-  if (!all(c(score_col, "município", group_col) %in% colnames(df))) {
-    stop("❌ O dataframe não contém todas as colunas necessárias: ",
-         paste(c("município", score_col, group_col), collapse = ", "))
-  }
+mapa_interativo <- function(df, var, quart = FALSE, titulo = NULL) {
+  stopifnot(
+    "df não contém todas as colunas necessárias" = all( c(var, "município", "região intermediária") %in% colnames(df))
+  )
 
   if (is.null(titulo)) {
-    titulo <- paste0("Mapa Interativo de ", score_col)
+    titulo <- paste0("Mapa Interativo de ", var)
+    if ("ano de referência" %in% colnames(df)) {
+      titulo <- paste(titulo, df$`ano de referência`[1])
+    }
   }
 
-  df_aux <-
+  geo_merged <-
     df %>%
     select(
       name = all_of("município"),
-      Score = all_of(score_col),
-      Grupo = all_of(group_col)
+      Score = all_of(var),
+      Grupo = all_of("região intermediária")
     ) %>%
     mutate(Score = round(Score, 4)) %>%
-    distinct(name, .keep_all = TRUE)
+    distinct(name, .keep_all = TRUE) %>%
+    left_join(x = mapa_MG, by = "name")
 
-  geo_merged <-
-    mapa_MG %>%
-    left_join(df_aux, by = "name")
+  coor = sf::st_bbox( filter(geo_merged, !is.na(Score)) )
 
   if (quart) {
     geo_merged <-
@@ -109,25 +108,22 @@ mapa_interativo <- function(df, score_col , titulo = NULL, quart = FALSE) {
     cores <- viridis::turbo(100, direction = -1)
   }
 
-  tmap::tmap_mode("view")
-  mapa <- tmap::tm_shape(geo_merged) +
+  #tmap::tmap_mode("view")
+  tmap::tm_shape(geo_merged, bbox = coor) +
     tmap::tm_fill(
       col = fill_var,
-      title = titulo,
+      title = "Legenda",
       style = style,
       palette = cores,
       popup.vars = c("name", "Grupo", fill_var, "Score")
     ) +
     tmap::tm_borders(col = "gray50", lwd = 0.5) +
     tmap::tm_basemap(server = "OpenStreetMap") +
-    tmap::tm_view(set.view = c(lon = -43.98, lat = -19.84, zoom = 6)) +
     tmap::tm_layout(
       main.title = titulo,
       main.title.position = "center",
       legend.outside = TRUE
     )
-
-  return(mapa)
 }
 
 
@@ -182,6 +178,7 @@ table_top_bottom <- function(df, top_n, bottom_n) {
     Piores = bottom_scores
   )
 }
+
 
 #' Boxplots Scores por Grupos
 #'

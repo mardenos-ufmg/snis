@@ -118,7 +118,7 @@ shiny = function() {
     ###  PainelFA  ###
     output$"fa-scores-mapa" = tmap::renderTmap({
       req(df())
-      mapa_interativo(df(), score_col = input$"fa-scores-var", quart = input$"fa-scores-quart") |> suppressMessages()
+      mapa_interativo(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |> suppressMessages()
       # plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
       #   plotly::ggplotly()
     })

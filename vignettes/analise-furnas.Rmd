@@ -22,11 +22,11 @@ alago =
   readxl::read_xlsx()
 
 dados2021 =
-  dados$"2021"$df |>
+  dados_snis$"2021"$df |>
   filter(`código do município` %in% alago$Codmun)
   
 dados2016 =
-  dados$"2016"$df |>
+  dados_snis$"2016"$df |>
   filter(`código do município` %in% alago$Codmun)
 
 ```
@@ -83,16 +83,16 @@ df =
 ## Mapas interativos
 
 ```{r}
-plot_interactive_map(dados2016, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2016",  quart = FALSE)
+mapa_interativo(dados2016, var = "score médio su", titulo = "Mapa SU 2016",  quart = FALSE)
 ```
 
 
 ```{r}
-plot_interactive_map(dados2021, score_col = "score médio su", group_col = "região intermediária", titulo = "Mapa SU 2021", quart = FALSE)
+mapa_interativo(dados2021, var = "score médio su", titulo = "Mapa SU 2021", quart = FALSE)
 ```
 
 ```{r}
-plot_interactive_map(df, score_col = "su_dif", group_col = "região intermediária", titulo = "Mapa SU Diferenças", quart = FALSE)
+mapa_interativo(df, var = "su_dif", titulo = "Mapa SU Diferenças", quart = FALSE)
 ```
 
 ## Tabelas
