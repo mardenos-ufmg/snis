@@ -49,6 +49,7 @@
 #' @importFrom purrr pluck
 #' @importFrom readODS read_ods
 #' @importFrom readr parse_number locale
+#' @import tidyverse
 read = function(ano) {
   stopifnot("Ano deve estar entre 2000 e 2022" = ano %in% 2000:2022)
 
@@ -170,6 +171,7 @@ read = function(ano) {
 #'
 #' @importFrom mice mice
 #' @importFrom readODS read_ods
+#' @import tidyverse
 processar_dados = function(ano) {
   cols = c(
     "ano de referência","município","código do município",

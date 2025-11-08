@@ -6,6 +6,7 @@
 #'
 #' @importFrom DT dataTableOutput datatable
 #' @importFrom tmap tmapOutput renderTmap
+#' @import shiny
 shiny = function() {
   header_col = function(title, color, height, width = 12) {
     column(width,

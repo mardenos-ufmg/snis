@@ -1,5 +1,3 @@
-
-
 #' Mapa interativo de Scores por Região
 #'
 #' Gera um mapa interativo mostrando a distribuição de um score por região,
@@ -16,6 +14,8 @@
 #' @export
 #'
 #' @importFrom viridis turbo
+#' @import tidyverse
+#' @import ggplot2
 mapa_interativo <- function(df, var, quart = FALSE, titulo = NULL) {
   stopifnot(
     "df não contém todas as colunas necessárias" = all( c(var, "município", "região intermediária") %in% colnames(df))
@@ -24,7 +24,7 @@ mapa_interativo <- function(df, var, quart = FALSE, titulo = NULL) {
   if (is.null(titulo)) {
     titulo <- paste0("Mapa Interativo de ", var)
     if ("ano de referência" %in% colnames(df)) {
-      titulo <- paste(titulo, df$`ano de referência`[1])
+      titulo <- paste0(titulo, " em ", df$`ano de referência`[1])
     }
   }
 
@@ -102,6 +102,8 @@ mapa_interativo <- function(df, var, quart = FALSE, titulo = NULL) {
 #' @export
 #'
 #' @importFrom gridExtra grid.arrange
+#' @import tidyverse
+#' @import ggplot2
 plot_loading = function(FA) {
   plot_list = list()
   grupos = colnames(FA$geral$scores)[-(1:2)]
@@ -150,6 +152,8 @@ plot_loading = function(FA) {
 #'   - `Piores`: data frame com os municípios com menores *scores médios*.
 #'
 #' @export
+#' @import tidyverse
+#' @import ggplot2
 table_top_bottom <- function(df, top_n, bottom_n) {
   df_aux <- df %>%
     group_by(município, `natureza jurídica`) %>%
@@ -208,6 +212,8 @@ table_top_bottom <- function(df, top_n, bottom_n) {
 #' @export
 #'
 #' @importFrom viridis viridis
+#' @import tidyverse
+#' @import ggplot2
 plot_boxplot <- function(df, var, group, titulo = NULL, paleta = "plasma") {
   stopifnot(
     "Faltam colunas no dataframe" = all(c(var, group) %in% colnames(df)),
@@ -257,6 +263,8 @@ plot_boxplot <- function(df, var, group, titulo = NULL, paleta = "plasma") {
 #' @return Um objeto `ggplot` com o histograma.
 #'
 #' @export
+#' @import tidyverse
+#' @import ggplot2
 plot_histograma <- function(df, var, titulo = NULL) {
   stopifnot(
     "A var informada não está no dataframe" = var %in% colnames(df)
@@ -302,6 +310,8 @@ plot_histograma <- function(df, var, titulo = NULL) {
 #' @export
 #'
 #' @importFrom viridis viridis
+#' @import tidyverse
+#' @import ggplot2
 plot_density <- function(df, var, titulo = NULL) {
   stopifnot(
     "A var informada não está no dataframe" = var %in% colnames(df)
