@@ -7,3 +7,4 @@ more/
 ^pkgdown$
 ^\.github$
 ^data-raw$
+^main\.R$

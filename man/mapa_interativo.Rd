@@ -4,17 +4,17 @@
 \alias{mapa_interativo}
 \title{Mapa interativo de Scores por Região}
 \usage{
-mapa_interativo(df, score_col, titulo = NULL, quart = FALSE)
+mapa_interativo(df, var, quart = FALSE, titulo = NULL)
 }
 \arguments{
 \item{df}{Data frame contendo os dados.}
 
-\item{score_col}{String com o nome da coluna que contém o score, como \code{"score médio su"}.}
-
-\item{titulo}{(opcional) Título do mapa. Se \code{NULL}, é gerado automaticamente com base no nome da coluna de score.}
+\item{var}{String com o nome da coluna que contém o score, como \code{"score médio su"}.}
 
 \item{quart}{(opcional) Lógico. Se \code{TRUE}, colore os municípios por \strong{quartis} do score;
 se \code{FALSE} (padrão), usa os valores contínuos.}
+
+\item{titulo}{(opcional) Título do mapa. Se \code{NULL}, é gerado automaticamente com base no nome da coluna de score.}
 }
 \value{
 Um objeto \code{tmap} interativo com os municípios coloridos por quartis do score.

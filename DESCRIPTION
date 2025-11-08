@@ -13,7 +13,8 @@ Depends:
     ggplot2,
     shiny,
     tidyverse,
-    tmap
+    tmap,
+    stats
 Imports:
     readxl,
     mice,
@@ -31,7 +32,9 @@ Imports:
     DT,
     ggridges,
     RColorBrewer,
-    viridis
+    viridis,
+    purrr,
+    gridExtra
 Suggests:
     knitr,
     rmarkdown,
