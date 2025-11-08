@@ -7,7 +7,7 @@ jurídicas).
 ## Usage
 
 ``` r
-plot_boxplot(df, score_cols, group_cols, titulo = NULL, cor_paleta = "plasma")
+plot_boxplot(df, var, group, titulo = NULL, paleta = "plasma")
 ```
 
 ## Arguments
@@ -16,12 +16,12 @@ plot_boxplot(df, score_cols, group_cols, titulo = NULL, cor_paleta = "plasma")
 
   Data frame contendo os dados.
 
-- score_cols:
+- var:
 
   Vetor de strings com os nomes das colunas que contêm os scores, como
   `score médio su`, `score médio eee`.
 
-- group_cols:
+- group:
 
   Vetor de strings com os nomes das colunas de agrupamento, como
   `natureza jurídica`.
@@ -30,7 +30,7 @@ plot_boxplot(df, score_cols, group_cols, titulo = NULL, cor_paleta = "plasma")
 
   (opcional) Título do gráfico. Se `NULL`, é gerado automaticamente
 
-- cor_paleta:
+- paleta:
 
   (opcional) Paleta de cores viridis a ser usada. Opções: `"viridis"`,
   `"plasma"`, `"magma"`, `"cividis"`, `"inferno"`. Padrão: `"plasma"`.

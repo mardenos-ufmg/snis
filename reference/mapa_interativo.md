@@ -6,7 +6,7 @@ colorindo os municípios de acordo com quartis do score.
 ## Usage
 
 ``` r
-mapa_interativo(df, score_col, titulo = NULL, quart = FALSE)
+mapa_interativo(df, var, quart = FALSE, titulo = NULL)
 ```
 
 ## Arguments
@@ -15,20 +15,20 @@ mapa_interativo(df, score_col, titulo = NULL, quart = FALSE)
 
   Data frame contendo os dados.
 
-- score_col:
+- var:
 
   String com o nome da coluna que contém o score, como
   `"score médio su"`.
-
-- titulo:
-
-  (opcional) Título do mapa. Se `NULL`, é gerado automaticamente com
-  base no nome da coluna de score.
 
 - quart:
 
   (opcional) Lógico. Se `TRUE`, colore os municípios por **quartis** do
   score; se `FALSE` (padrão), usa os valores contínuos.
+
+- titulo:
+
+  (opcional) Título do mapa. Se `NULL`, é gerado automaticamente com
+  base no nome da coluna de score.
 
 ## Value
 

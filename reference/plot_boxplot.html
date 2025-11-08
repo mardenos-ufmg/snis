@@ -42,7 +42,7 @@ score em diferentes grupos (como prestadores, regiões ou naturezas jurídicas).
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_boxplot</span><span class="op">(</span><span class="va">df</span>, <span class="va">score_cols</span>, <span class="va">group_cols</span>, titulo <span class="op">=</span> <span class="cn">NULL</span>, cor_paleta <span class="op">=</span> <span class="st">"plasma"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_boxplot</span><span class="op">(</span><span class="va">df</span>, <span class="va">var</span>, <span class="va">group</span>, titulo <span class="op">=</span> <span class="cn">NULL</span>, paleta <span class="op">=</span> <span class="st">"plasma"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -53,11 +53,11 @@ score em diferentes grupos (como prestadores, regiões ou naturezas jurídicas).
 <dd><p>Data frame contendo os dados.</p></dd>
 
 
-<dt id="arg-score-cols">score_cols<a class="anchor" aria-label="anchor" href="#arg-score-cols"></a></dt>
+<dt id="arg-var">var<a class="anchor" aria-label="anchor" href="#arg-var"></a></dt>
 <dd><p>Vetor de strings com os nomes das colunas que contêm os scores, como <code>score médio su</code>, <code>score médio eee</code>.</p></dd>
 
 
-<dt id="arg-group-cols">group_cols<a class="anchor" aria-label="anchor" href="#arg-group-cols"></a></dt>
+<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
 <dd><p>Vetor de strings com os nomes das colunas de agrupamento, como <code>natureza jurídica</code>.</p></dd>
 
 
@@ -65,7 +65,7 @@ score em diferentes grupos (como prestadores, regiões ou naturezas jurídicas).
 <dd><p>(opcional) Título do gráfico. Se <code>NULL</code>, é gerado automaticamente</p></dd>
 
 
-<dt id="arg-cor-paleta">cor_paleta<a class="anchor" aria-label="anchor" href="#arg-cor-paleta"></a></dt>
+<dt id="arg-paleta">paleta<a class="anchor" aria-label="anchor" href="#arg-paleta"></a></dt>
 <dd><p>(opcional) Paleta de cores viridis a ser usada.
 Opções: <code>"viridis"</code>, <code>"plasma"</code>, <code>"magma"</code>, <code>"cividis"</code>, <code>"inferno"</code>.
 Padrão: <code>"plasma"</code>.</p></dd>

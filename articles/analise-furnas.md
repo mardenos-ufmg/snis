@@ -234,80 +234,76 @@ table_top_bottom(dados2021, top_n = 10, bottom_n = 10)
 ## Gráficos score
 
 ``` r
-plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2016")
+plot_boxplot(dados2016, var = "score médio su", group = "prestador2")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-11-1.png)
 
 ``` r
-plot_boxplot(dados2016, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2016")
+plot_boxplot(dados2016, var = "score médio su", group = "tipo de serviço")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-12-1.png)
 
 ``` r
-plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "prestador2", titulo = "Score por Prestador 2021")
+plot_boxplot(dados2021, var = "score médio su", group = "prestador2")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-13-1.png)
 
 ``` r
-plot_boxplot(dados2021, score_cols = "score médio su", group_cols = "tipo de serviço", titulo =  "Score por Tipo de Serviço 2021")
+plot_boxplot(dados2021, var = "score médio su", group = "tipo de serviço")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-14-1.png)
 
 ``` r
-plot_median_barplot(dados2016, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2016")
+#plot_median_barplot(dados2016, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2016")
 ```
-
-![](analise-furnas_files/figure-html/unnamed-chunk-15-1.png)
 
 ``` r
-plot_median_barplot(dados2021, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2021")
+#plot_median_barplot(dados2021, score_cols = "score médio su", group_cols = "natureza jurídica", titulo = "Score por Natureza Jurídica 2021")
 ```
-
-![](analise-furnas_files/figure-html/unnamed-chunk-16-1.png)
 
 ## Gráficos variáveis
 
 ``` r
-plot_hist_score(dados2016, group_col = "IN023", titulo = "Densidade IN023 2016")
+plot_histograma(dados2016, var = "IN023")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-17-1.png)
 
 ``` r
 #IN023 = Índice de atendimento urbano de água
-plot_hist_score(dados2021, group_col = "IN023", titulo = "Densidade IN023 2021")
+plot_histograma(dados2021, var = "IN023")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-18-1.png)
 
 ``` r
 #IN055  Índice de atendimento total de água
-plot_hist_score(dados2016, group_col = "IN055", titulo = "Densidade IN055 2016")
+plot_histograma(dados2016, var = "IN055")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-19-1.png)
 
 ``` r
-plot_density_score(dados2016, group_col = "IN055", titulo = "Densidade IN055 2016")
-```
-
-![](analise-furnas_files/figure-html/unnamed-chunk-19-2.png)
-
-``` r
-plot_hist_score(dados2021, group_col = "IN055", titulo = "Densidade IN055 2021")
+plot_density(dados2016, var = "IN055")
 ```
 
 ![](analise-furnas_files/figure-html/unnamed-chunk-20-1.png)
 
 ``` r
-plot_density_score(dados2021, group_col = "IN055", titulo = "Densidade IN055 2021")
+plot_histograma(dados2021, var = "IN055")
 ```
 
-![](analise-furnas_files/figure-html/unnamed-chunk-20-2.png)
+![](analise-furnas_files/figure-html/unnamed-chunk-21-1.png)
+
+``` r
+plot_density(dados2021, var = "IN055")
+```
+
+![](analise-furnas_files/figure-html/unnamed-chunk-22-1.png)
 
 ``` r
 dados_comparados <- bind_rows(
@@ -330,4 +326,4 @@ ggplot(dados_comparados, aes(x = POP, fill = Ano)) +
   theme_minimal()
 ```
 
-![](analise-furnas_files/figure-html/unnamed-chunk-21-1.png)
+![](analise-furnas_files/figure-html/unnamed-chunk-23-1.png)
