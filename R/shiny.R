@@ -74,7 +74,9 @@ shiny = function() {
         tmap::tmapOutput("fa-scores-mapa")
       ),
       column(4,
-        tableOutput("fa-scores-summary")
+        fluidRow(tableOutput("fa-scores-summary")),
+        fluidRow(verbatimTextOutput("fa-scores-summary2"))
+
       )
     ),
 
@@ -95,13 +97,13 @@ shiny = function() {
   ########################
   #####  Inferência  #####
   ########################
-  PainelInferencia <- tabPanel("Inferência", h3("Inferência"))
+  PainelInferencia = tabPanel("Inferência", h3("Inferência"))
 
 
   #############################
   #####  Painel Comparar  #####
   #############################
-  PainelComparar <- tabPanel("Comparar", h3("Painel Comparar (sem seletor de ano)"))
+  PainelComparar = tabPanel("Comparar", h3("Painel Comparar (sem seletor de ano)"))
 
 
 
@@ -115,6 +117,17 @@ shiny = function() {
     #var   = reactive({ input$"fa-scores-var" })
     #quart = reactive({ input$"fa-scores-quart" })
     df    = reactive({ dados_snis[[ano()]]$df })
+    geo_df = reactive({
+      df() %>%
+        select(
+          name = all_of("município"),
+          Score = all_of(input$"fa-scores-var"),
+          Grupo = all_of("região intermediária")
+        ) %>%
+        mutate(Score = round(Score, 4)) %>%
+        distinct(name, .keep_all = TRUE) %>%
+        left_join(x = mapa_MG, by = "name")
+    })
 
     ###  PainelFA  ###
     output$"fa-scores-mapa" = tmap::renderTmap({
@@ -197,6 +210,27 @@ shiny = function() {
     output$"tabela-mapa" = tmap::renderTmap({
       mapa_interativo(df(), coluna_selecionada(), quart = T) |> suppressMessages()
     })
+
+    observeEvent(input$"fa-scores-mapa_shape_click", {
+      click = input$"fa-scores-mapa_shape_click"
+
+      click_municipio =
+        geo_df() |>
+        slice(as.integer(substring(click$id,2))) |>
+        as_tibble() |>
+        pull("id") |>
+        as.integer()
+
+      output$"fa-scores-summary2" = renderPrint({
+        df() |>
+          filter(`código do município` == click_municipio) |>
+          select(all_of(c(
+            "município", "código do município", "natureza jurídica", "tipo de serviço", "abrangência", "código do prestador", "prestador"
+            )))
+      })
+
+    })
+
 
   }
 
