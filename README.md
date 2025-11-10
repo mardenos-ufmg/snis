@@ -31,8 +31,9 @@ install.packages("devtools")
 ou, preferencialmente
 
 ``` r
-if !("pak" %in% rownames(installed.packages())) install.packages("pak")
-pak::pak("devtools")
+if (!{"pak" %in% rownames(installed.packages())}) install.packages("pak")
+if (!{"devtools" %in% rownames(installed.packages())}) pak::pak("devtools")
+
 ```
 
 Em seguida abra o repositório `snis` descompactado em seu PC e clique em `snis.Rproj`.
