@@ -12,7 +12,9 @@ Depends:
     R (>= 4.0.0),
     ggplot2,
     shiny,
-    tidyverse
+    tidyverse,
+    tmap,
+    stats
 Imports:
     readxl,
     mice,
@@ -30,7 +32,9 @@ Imports:
     DT,
     ggridges,
     RColorBrewer,
-    viridis
+    viridis,
+    purrr,
+    gridExtra
 Suggests:
     knitr,
     rmarkdown,

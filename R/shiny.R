@@ -1,3 +1,12 @@
+#' ShinyApp
+#'
+#' Função geradora da aplicação em Shiny do pacote SNIS
+#'
+#' @export
+#'
+#' @importFrom DT dataTableOutput datatable
+#' @importFrom tmap tmapOutput renderTmap
+#' @import shiny
 shiny = function() {
   header_col = function(title, color, height, width = 12) {
     column(width,
@@ -17,8 +26,6 @@ shiny = function() {
     )
   }
 
-  dados = dados
-
   ###########################
   #####  Painel Tabela  #####
   ###########################
@@ -33,7 +40,7 @@ shiny = function() {
     fluidRow(
       column(7,
         fluidRow(header_col("Mapa", "#a8f2fe", 8)),
-        plotly::plotlyOutput("tabela-mapa")
+        tmap::tmapOutput("tabela-mapa")
       ),
       column(5,
         fluidRow(header_col("Resumo", "#a8f2fe", 8)),
@@ -64,10 +71,12 @@ shiny = function() {
 
     fluidRow(
       column(8,
-        plotly::plotlyOutput("fa-scores-mapa")
+        tmap::tmapOutput("fa-scores-mapa")
       ),
       column(4,
-        tableOutput("fa-scores-summary")
+        fluidRow(tableOutput("fa-scores-summary")),
+        fluidRow(verbatimTextOutput("fa-scores-summary2"))
+
       )
     ),
 
@@ -88,13 +97,13 @@ shiny = function() {
   ########################
   #####  Inferência  #####
   ########################
-  PainelInferencia <- tabPanel("Inferência", h3("Inferência"))
+  PainelInferencia = tabPanel("Inferência", h3("Inferência"))
 
 
   #############################
   #####  Painel Comparar  #####
   #############################
-  PainelComparar <- tabPanel("Comparar", h3("Painel Comparar (sem seletor de ano)"))
+  PainelComparar = tabPanel("Comparar", h3("Painel Comparar (sem seletor de ano)"))
 
 
 
@@ -107,13 +116,25 @@ shiny = function() {
     ano   = reactive({ input$"geral-ano" })
     #var   = reactive({ input$"fa-scores-var" })
     #quart = reactive({ input$"fa-scores-quart" })
-    df    = reactive({ dados[[ano()]]$df })
+    df    = reactive({ dados_snis[[ano()]]$df })
+    geo_df = reactive({
+      df() %>%
+        select(
+          name = all_of("município"),
+          Score = all_of(input$"fa-scores-var"),
+          Grupo = all_of("região intermediária")
+        ) %>%
+        mutate(Score = round(Score, 4)) %>%
+        distinct(name, .keep_all = TRUE) %>%
+        left_join(x = mapa_MG, by = "name")
+    })
 
     ###  PainelFA  ###
-    output$"fa-scores-mapa" = plotly::renderPlotly({
+    output$"fa-scores-mapa" = tmap::renderTmap({
       req(df())
-      plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
-        plotly::ggplotly()
+      mapa_interativo(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |> suppressMessages()
+      # plot_map(df(), var = input$"fa-scores-var", quart = input$"fa-scores-quart") |>
+      #   plotly::ggplotly()
     })
 
     observeEvent(df(), {
@@ -135,22 +156,27 @@ shiny = function() {
     output$"fa-loadings-eee" = renderPlot({
       req(ano())
       #FA_EEE = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "EEE"))
-      plot_loading(dados[[ano()]]$fa$eee)
+      plot_loading(dados_snis[[ano()]]$fa$eee)
     })
 
     output$"fa-loadings-su" = renderPlot({
       req(ano())
       #FA_SU = fa(df(), features = readODS::read_ods("data/features.ods", sheet = "SU"))
-      plot_loading(dados[[ano()]]$fa$su)
+      plot_loading(dados_snis[[ano()]]$fa$su)
     })
 
     ###  PainelTabela  ###
     output$"tabela-tabela" = DT::renderDataTable({
       DT::datatable(df(),
                     selection = list(mode = "single", target = "column"),
-                    options = list(scrollX = TRUE),
-                    rownames = FALSE
+                    rownames = FALSE, filter = 'none',
+                    extensions = c('FixedColumns'),
+                    options = list(
+                      dom = 'Bfrtip',
+                      paging = TRUE, searching = TRUE, info = FALSE,
+                      sort = TRUE, scrollX = TRUE, fixedColumns = list(leftColumns = 3)
                     )
+                  )
     })
 
     coluna_selecionada = reactive({
@@ -181,10 +207,30 @@ shiny = function() {
         as.data.frame()
     })
 
-    output$"tabela-mapa" = plotly::renderPlotly({
-      plot_map(df(), coluna_selecionada(), F) |>
-        plotly::ggplotly()
+    output$"tabela-mapa" = tmap::renderTmap({
+      mapa_interativo(df(), coluna_selecionada(), quart = T) |> suppressMessages()
     })
+
+    observeEvent(input$"fa-scores-mapa_shape_click", {
+      click = input$"fa-scores-mapa_shape_click"
+
+      click_municipio =
+        geo_df() |>
+        slice(as.integer(substring(click$id,2))) |>
+        as_tibble() |>
+        pull("id") |>
+        as.integer()
+
+      output$"fa-scores-summary2" = renderPrint({
+        df() |>
+          filter(`código do município` == click_municipio) |>
+          select(all_of(c(
+            "município", "código do município", "natureza jurídica", "tipo de serviço", "abrangência", "código do prestador", "prestador"
+            )))
+      })
+
+    })
+
 
   }
 

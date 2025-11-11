@@ -51,7 +51,7 @@ codigos =
 
 codigos2 =
   codigos |>
-  filter( código %in% colnames(dados[["2021"]]$df) )
+  filter( código %in% colnames(dados_snis[["2021"]]$df) )
 ```
 
 ```{r}
