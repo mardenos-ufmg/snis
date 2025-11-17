@@ -252,67 +252,22 @@ plot_boxplot <- function(df, var, group, titulo = NULL, paleta = "plasma") {
 }
 
 
-#' Histograma de uma variável numérica
+#' Histograma com curva de densidade
 #'
-#' Cria um histograma mostrando a distribuição dos valores de uma variável numérica.
-#'
-#' @param df Data frame contendo os dados.
-#' @param var String com o nome da coluna numérica a ser analisada, como `"IN023"`.
-#' @param titulo (opcional) Título do gráfico. Se `NULL`, é gerado automaticamente.
-#'
-#' @return Um objeto `ggplot` com o histograma.
-#'
-#' @export
-#' @import tidyverse
-#' @import ggplot2
-plot_histograma <- function(df, var, titulo = NULL) {
-  stopifnot(
-    "A var informada não está no dataframe" = var %in% colnames(df)
-    )
-
-  if (is.null(titulo)) {
-    titulo <- paste0("Distribuição de ", var)
-    if ("ano de referência" %in% colnames(df)) {
-      titulo <- paste0(titulo, " em ", df$`ano de referência`[1])
-    }
-  }
-
-  ggplot(df, aes(x = .data[[var]])) +
-    geom_histogram(
-      bins = 30,
-      fill = viridis::viridis(1, option = "plasma"),
-      color = "white",
-      alpha = 0.8
-    ) +
-    labs(
-      title = titulo,
-      x = var,
-      y = "Frequência absoluta"
-    ) +
-    theme_minimal(base_size = 13) +
-    theme(
-      plot.title = element_text(hjust = 0.5, face = "bold")
-    )
-}
-
-
-#' Densidade de uma variável numérica
-#'
-#' Cria um gráfico de densidade mostrando a distribuição suave dos valores
-#' de uma variável numérica, como uma "onda".
+#' Cria um histograma com a curva de densidade sobreposta,
+#' permitindo visualizar simultaneamente a frequência e a distribuição suave.
 #'
 #' @param df Data frame contendo os dados.
 #' @param var String com o nome da coluna numérica a ser analisada, como `"IN023"`.
 #' @param titulo (opcional) Título do gráfico. Se `NULL`, é gerado automaticamente.
 #'
-#' @return Um objeto `ggplot` com o gráfico de densidade.
+#' @return Um objeto `ggplot` com o histograma e a curva de densidade.
 #'
 #' @export
 #'
-#' @importFrom viridis viridis
 #' @import tidyverse
 #' @import ggplot2
-plot_density <- function(df, var, titulo = NULL) {
+plot_hist <- function(df, var, titulo = NULL) {
   stopifnot(
     "A var informada não está no dataframe" = var %in% colnames(df)
   )
@@ -325,10 +280,19 @@ plot_density <- function(df, var, titulo = NULL) {
   }
 
   ggplot(df, aes(x = .data[[var]])) +
+
+    geom_histogram(
+      aes(y = ..density..),
+      bins = 30,
+      fill = "#6BAED6",
+      color = "white",
+      alpha = 0.6
+    ) +
+
     geom_density(
-      fill = viridis::viridis(1, option = "plasma"),
-      color = "black",
-      alpha = 0.7
+      color = "#08519C",
+      alpha = 0.4,
+      linewidth = 1
     ) +
     labs(
       title = titulo,

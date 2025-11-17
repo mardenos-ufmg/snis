@@ -159,7 +159,7 @@ plot_histograma(dados2021, var = "IN055")
 
 
 ```{r}
-plot_density(dados2021, var = "IN055")
+plot_hist(dados2016, "IN055")
 ```
 
 ```{r}
