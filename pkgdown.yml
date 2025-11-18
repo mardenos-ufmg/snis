@@ -2,9 +2,8 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
-  analise-furnas: analise-furnas.html
   dados: dados.html
-last_built: 2025-11-10T01:29Z
+last_built: 2025-11-18T18:01Z
 urls:
   reference: https://mardenos-ufmg.github.io/snis/reference
   article: https://mardenos-ufmg.github.io/snis/articles

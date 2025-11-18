@@ -64,10 +64,8 @@ pacote!
   : Mapa interativo de Scores por Região
 - [`plot_boxplot()`](https://mardenos-ufmg.github.io/snis/reference/plot_boxplot.md)
   : Boxplots Scores por Grupos
-- [`plot_density()`](https://mardenos-ufmg.github.io/snis/reference/plot_density.md)
-  : Densidade de uma variável numérica
-- [`plot_histograma()`](https://mardenos-ufmg.github.io/snis/reference/plot_histograma.md)
-  : Histograma de uma variável numérica
+- [`plot_hist()`](https://mardenos-ufmg.github.io/snis/reference/plot_hist.md)
+  : Histograma com curva de densidade
 - [`plot_loading()`](https://mardenos-ufmg.github.io/snis/reference/plot_loading.md)
   : Heatmap das Cargas Fatoriais por Grupo
 - [`processar_dados()`](https://mardenos-ufmg.github.io/snis/reference/processar_dados.md)
@@ -87,5 +85,4 @@ pacote!
 
 ### All vignettes
 
-- [analise-furnas](https://mardenos-ufmg.github.io/snis/articles/analise-furnas.md):
 - [dados](https://mardenos-ufmg.github.io/snis/articles/dados.md):
